@@ -1,0 +1,127 @@
+[1/14] Generating ../../partition_table/partition-table.bin
+Partition table binary generated. Contents:
+*******************************************************************************
+# ESP-IDF Partition Table
+# Name, Type, SubType, Offset, Size, Flags
+nvs,data,nvs,0x9000,24K,
+phy_init,data,phy,0xf000,4K,
+factory,app,factory,0x10000,1500K,
+*******************************************************************************
+[2/14] Generating x509_crt_bundle
+[3/14] Generating ../../x509_crt_bundle.S
+[4/14] Building ASM object esp-idf/mbedtls/CMakeFiles/__idf_mbedtls.dir/__/__/x509_crt_bundle.S.obj
+[5/14] Linking C static library esp-idf/mbedtls/libmbedtls.a
+[6/14] Performing configure step for 'bootloader'
+-- Building ESP-IDF components for target esp32c3
+-- Project sdkconfig file /Users/sindregjone/ESPworkspace/TempAndHumSens/sdkconfig
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/soc/esp32c3/ld/esp32c3.peripherals.ld
+-- App "bootloader" version: v5.1.2-dirty
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_rom/esp32c3/ld/esp32c3.rom.ld
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_rom/esp32c3/ld/esp32c3.rom.api.ld
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_rom/esp32c3/ld/esp32c3.rom.libgcc.ld
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_rom/esp32c3/ld/esp32c3.rom.newlib.ld
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader/subproject/main/ld/esp32c3/bootloader.ld
+-- Adding linker script /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader/subproject/main/ld/esp32c3/bootloader.rom.ld
+-- Components: bootloader bootloader_support efuse esp_app_format esp_common esp_hw_support esp_rom esp_system esptool_py freertos hal log main micro-ecc newlib partition_table riscv soc spi_flash
+-- Component paths: /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader_support /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/efuse /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_app_format /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_common /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_hw_support /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_rom /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esp_system /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esptool_py /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/freertos /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/hal /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/log /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader/subproject/main /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/bootloader/subproject/components/micro-ecc /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/newlib /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/partition_table /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/riscv /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/soc /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/spi_flash
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /Users/sindregjone/ESPworkspace/TempAndHumSens/build/bootloader
+[7/14] Performing build step for 'bootloader'
+[1/2] Generating binary image from built executable
+esptool.py v4.7.0
+Creating esp32c3 image...
+Merged 1 ELF section
+Successfully created esp32c3 image.
+Generated /Users/sindregjone/ESPworkspace/TempAndHumSens/build/bootloader/bootloader.bin
+[2/2] cd /Users/sindregjone/ESPworkspace/TempAndHumSens/build/bootloader/esp-idf/esptool_py && /Users/sindregjone/.espressif/python_env/idf5.1_py3.9_env/bin/python /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /Users/sindregjone/ESPworkspace/TempAndHumSens/build/bootloader/bootloader.bin
+Bootloader binary size 0x5070 bytes. 0x2f90 bytes (37%) free.
+[8/13] Completed 'bootloader'
+[9/13] Generating ld/sections.ld
+[10/13] Linking CXX executable TempAndHumSens.elf
+[11/13] Generating binary image from built executable
+esptool.py v4.7.0
+Creating esp32c3 image...
+Merged 2 ELF sections
+Successfully created esp32c3 image.
+Generated /Users/sindregjone/ESPworkspace/TempAndHumSens/build/TempAndHumSens.bin
+[12/13] cd /Users/sindregjone/ESPworkspace/TempAndHumSens/build/esp-idf/esptool_py && /Users/sindregjone/.espressif/python_env/idf5.1_py3.9_env/bin/python /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/sindregjone/ESPworkspace/TempAndHumSens/build/partition_table/partition-table.bin /Users/sindregjone/ESPworkspace/TempAndHumSens/build/TempAndHumSens.bin
+TempAndHumSens.bin binary size 0x147f60 bytes. Smallest app partition is 0x177000 bytes. 0x2f0a0 bytes (13%) free.
+[12/13] cd /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esptool_py && /Users/sindregjone/.espressif/tools/cmake/3.24.0/CMake.app/Contents/bin/cmake -D IDF_PATH=/Users/sindregjone/ESP-IDF/esp-idf-v5.1.2 -D "SERIAL_TOOL=/Users/sindregjone/.espressif/python_env/idf5.1_py3.9_env/bin/python;;/Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esptool_py/esptool/esptool.py;--chip;esp32c3" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/Users/sindregjone/ESPworkspace/TempAndHumSens/build -P /Users/sindregjone/ESP-IDF/esp-idf-v5.1.2/components/esptool_py/run_serial_tool.cmake
+esptool.py --chip esp32c3 -p /dev/cu.usbserial-1110 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x0 bootloader/bootloader.bin 0x10000 TempAndHumSens.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.7.0
+Serial port /dev/cu.usbserial-1110
+Connecting....
+Chip is ESP32-C3 (QFN32) (revision v0.4)
+Features: WiFi, BLE, Embedded Flash 4MB (XMC)
+Crystal is 40MHz
+MAC: c0:4e:30:f1:24:ec
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00005fff...
+Flash will be erased from 0x00010000 to 0x00157fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 20592 bytes to 12641...
+Writing at 0x00000000... (100 %)
+Wrote 20592 bytes (12641 compressed) at 0x00000000 in 0.7 seconds (effective 222.7 kbit/s)...
+Hash of data verified.
+Compressed 1343328 bytes to 751294...
+Writing at 0x00010000... (2 %)
+Writing at 0x0001c542... (4 %)
+Writing at 0x00029972... (6 %)
+Writing at 0x00034f10... (8 %)
+Writing at 0x0003a31f... (10 %)
+Writing at 0x00041979... (13 %)
+Writing at 0x0004af5a... (15 %)
+Writing at 0x00051255... (17 %)
+Writing at 0x0005809a... (19 %)
+Writing at 0x0005fee9... (21 %)
+Writing at 0x00067c6b... (23 %)
+Writing at 0x0006f234... (26 %)
+Writing at 0x00076276... (28 %)
+Writing at 0x0007e193... (30 %)
+Writing at 0x00085f3b... (32 %)
+Writing at 0x0008d4cc... (34 %)
+Writing at 0x0009449d... (36 %)
+Writing at 0x0009b124... (39 %)
+Writing at 0x000a2abc... (41 %)
+Writing at 0x000a9d38... (43 %)
+Writing at 0x000b0b25... (45 %)
+Writing at 0x000b79a0... (47 %)
+Writing at 0x000becf3... (50 %)
+Writing at 0x000c57eb... (52 %)
+Writing at 0x000cc195... (54 %)
+Writing at 0x000d2753... (56 %)
+Writing at 0x000d8ddb... (58 %)
+Writing at 0x000de98c... (60 %)
+Writing at 0x000e4afc... (63 %)
+Writing at 0x000eac7a... (65 %)
+Writing at 0x000f0f20... (67 %)
+Writing at 0x000f7143... (69 %)
+Writing at 0x000fd768... (71 %)
+Writing at 0x0010394e... (73 %)
+Writing at 0x00109c16... (76 %)
+Writing at 0x00110e18... (78 %)
+Writing at 0x0011753e... (80 %)
+Writing at 0x0011ddba... (82 %)
+Writing at 0x00124a01... (84 %)
+Writing at 0x0012b650... (86 %)
+Writing at 0x00131444... (89 %)
+Writing at 0x00137097... (91 %)
+Writing at 0x0013e5b7... (93 %)
+Writing at 0x00144fba... (95 %)
+Writing at 0x0014b679... (97 %)
+Writing at 0x00152887... (100 %)
+Wrote 1343328 bytes (751294 compressed) at 0x00010000 in 22.2 seconds (effective 484.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 105...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (105 compressed) at 0x00008000 in 0.1 seconds (effective 304.8 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
