@@ -18,6 +18,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "freertos/semphr.h"
 #include "esp_system.h"
 #include "esp_mac.h"
 #include "esp_wifi.h"
@@ -57,9 +58,6 @@
 
 char Date_Time[100];
 
-//uint64_t sleepTime = 54*1000000;
-
-
 void initialize_bluetooth()
 {
 
@@ -95,7 +93,7 @@ void BT_Connect()
 {
 			printf("Entering bluetooth pairing mode");
 
-			nvs_flash_erase();
+			nvs_flash_erase(); //maybe also delete ssid and password in an additional way.
 
 			esp_err_t ret;
 			// Initialize NVS
@@ -107,51 +105,75 @@ void BT_Connect()
 			}
 			ESP_ERROR_CHECK( ret );
 
-			initialize_bluetooth();
-
 			initialise_wifi();
+			vTaskDelay(100);
+
+			esp_wifi_start();
+			vTaskDelay(100);
+
+			initialize_bluetooth();
+			vTaskDelay(3000);
+
+			//initialise_wifi();
 
 
-			//esp_wifi_start();
-
-			//esp_wifi_disconnect();
-
-    		vTaskDelay(3000);
-    		print_connected_ssid();
-
-
+    		//print_connected_ssid();
 }
+
+SemaphoreHandle_t connectionSemaphore;
+
+void connection_task(void *params) {
+    while (1) {
+        // Wait for the semaphore to be given by the ISR
+        if (xSemaphoreTake(connectionSemaphore, portMAX_DELAY))
+        {
+        	esp_wifi_stop();
+        	esp_bt_controller_disable();
+
+            BT_Connect();  // Perform connection setup
+            uxTaskGetStackHighWaterMark(NULL);
+        }
+    }
+}
+
+
+void IRAM_ATTR gpio_isr_handler(void* arg)
+    {
+    		    // Handle the interrupt event here (e.g., toggle an LED, send a signal)
+			xSemaphoreGiveFromISR(connectionSemaphore, NULL);
+    }
+
+
+void gpio_button_init() {
+    		    gpio_config_t io_conf;
+    		    io_conf.intr_type = GPIO_INTR_NEGEDGE; // Trigger on falling edge
+    		    io_conf.mode = GPIO_MODE_INPUT;
+    		    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
+    		    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+    		    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    		    gpio_config(&io_conf);
+
+    		    // Install GPIO ISR service
+    		    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
+    		    // Attach the interrupt service routine
+    		    gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
+    		}
+
+
+
+
 
 
 void app_main(void)
 {
 
-	esp_err_t ret;
-	// Initialize NVS
-	ret = nvs_flash_init();
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-	{
-		ESP_ERROR_CHECK(nvs_flash_erase());
-		ret = nvs_flash_init();
-	}
-	ESP_ERROR_CHECK( ret );
+		connectionSemaphore = xSemaphoreCreateBinary();
+		xTaskCreate(connection_task, "Connection Task", 4096, NULL, 10, NULL);
+		gpio_button_init();
 
+		gpio_reset_pin(GPIO_SHTC3);
+		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
 
-	initialise_wifi();
-
-
-	gpio_reset_pin(GPIO_SHTC3);
-	gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
-
-
-
-/*	gpio_config_t io_conf = {};
-	    io_conf.intr_type = GPIO_INTR_NEGEDGE;
-	    io_conf.mode = GPIO_MODE_INPUT;
-	    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
-	    io_conf.pull_up_en = 1;
-	    gpio_config(&io_conf);						//https://github.com/espressif/esp-idf/blob/v5.2.1/examples/peripherals/gpio/generic_gpio/main/gpio_example_main.c
-*/
 
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
@@ -174,6 +196,18 @@ void app_main(void)
 			printf("Not a deepsleep reset\r\n");
 		}
 
+
+		esp_err_t ret;
+		// Initialize NVS
+		ret = nvs_flash_init();
+		if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+		{
+			ESP_ERROR_CHECK(nvs_flash_erase());
+			ret = nvs_flash_init();
+		}
+		ESP_ERROR_CHECK(ret);
+
+		initialise_wifi();
 
 		esp_wifi_start();
 
