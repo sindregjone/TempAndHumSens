@@ -29,6 +29,7 @@
 #include "esp_http_client.h"
 #include "string.h"
 #include "stdbool.h"
+#include "esp_bt_main.h"
 
 #include "esp_blufi_api.h"
 #include "blufi_example.h"
@@ -57,6 +58,9 @@
 #define GPIO_BT 2
 
 char Date_Time[100];
+
+SemaphoreHandle_t btSetupDoneSemaphore = NULL;
+
 
 void initialize_bluetooth()
 {
@@ -91,7 +95,7 @@ void initialize_bluetooth()
 
 void BT_Connect()
 {
-			printf("Entering bluetooth pairing mode");
+			printf("Entering bluetooth pairing mode\r\n");
 
 			nvs_flash_erase(); //maybe also delete ssid and password in an additional way.
 
@@ -104,43 +108,81 @@ void BT_Connect()
 				ret = nvs_flash_init();
 			}
 			ESP_ERROR_CHECK( ret );
+			printf("init wifi inide bt_connect\r\n");
 
 			initialise_wifi();
+
 			vTaskDelay(100);
+			printf("Done init wifi inside bt_connect\r\n");
 
 			esp_wifi_start();
 			vTaskDelay(100);
 
+			printf("Started wifi\r\n");
+
 			initialize_bluetooth();
+
 			vTaskDelay(3000);
+			printf("Done setting up BT\r\n");
+			xSemaphoreGive(btSetupDoneSemaphore);
 
-			//initialise_wifi();
-
-
-    		//print_connected_ssid();
 }
 
-SemaphoreHandle_t connectionSemaphore;
+TaskHandle_t bluetoothTaskHandle = NULL;
 
-void connection_task(void *params) {
-    while (1) {
+void bluetooth_task(void *params)
+{
+	while(1){
+
+		printf("Bluetooth task started, waiting for notification...\n");
         // Wait for the semaphore to be given by the ISR
-        if (xSemaphoreTake(connectionSemaphore, portMAX_DELAY))
-        {
-        	esp_wifi_stop();
-        	esp_bt_controller_disable();
+
+    		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    		printf("Bluetooth task: Notification received, proceeding...\n");
+
+    		esp_bt_controller_status_t bt_status = esp_bt_controller_get_status();
+
+
+    		esp_err_t ret = esp_wifi_stop();
+    		if (ret != ESP_OK)
+    		{
+    			printf("WIFI, Failed to stop Wi-Fi: %d", ret);
+    		}
+
+    		ret = esp_wifi_deinit();
+    		if (ret != ESP_OK)
+    		{
+    			printf("WIFI, Failed to deinitialize Wi-Fi: %d", ret);
+    		}
+
+
+
+
+    		if(bt_status == ESP_BT_CONTROLLER_STATUS_ENABLED)
+    		{
+    			esp_bt_controller_disable();
+    		}
+    		if(bt_status == ESP_BT_CONTROLLER_STATUS_INITED)
+    		{
+    			esp_bt_controller_deinit();
+    		}
+
+        	vTaskDelay(100);
 
             BT_Connect();  // Perform connection setup
-            uxTaskGetStackHighWaterMark(NULL);
-        }
-    }
+            //uxTaskGetStackHighWaterMark(NULL);
+            printf("Bluetooth task: Setup complete, task ending.\n");
+            vTaskDelete(NULL);
+	}
 }
 
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
     		    // Handle the interrupt event here (e.g., toggle an LED, send a signal)
-			xSemaphoreGiveFromISR(connectionSemaphore, NULL);
+			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+			vTaskNotifyGiveFromISR(bluetoothTaskHandle, &xHigherPriorityTaskWoken);
+			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
 
@@ -162,13 +204,16 @@ void gpio_button_init() {
 
 
 
-
-
 void app_main(void)
 {
 
-		connectionSemaphore = xSemaphoreCreateBinary();
-		xTaskCreate(connection_task, "Connection Task", 4096, NULL, 10, NULL);
+	 	btSetupDoneSemaphore = xSemaphoreCreateBinary();
+	    if (btSetupDoneSemaphore == NULL) {
+	        // Handle error
+	        ESP_LOGE("APP_MAIN", "Failed to create semaphore");
+	        return;
+	    }
+	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 10, &bluetoothTaskHandle);
 		gpio_button_init();
 
 		gpio_reset_pin(GPIO_SHTC3);
@@ -191,11 +236,15 @@ void app_main(void)
 			break;
 		case ESP_SLEEP_WAKEUP_TIMER:
 			printf("Wakeup reason: Timer\r\n");
+			 xSemaphoreGive(btSetupDoneSemaphore);
 			break;
 		default:
 			printf("Not a deepsleep reset\r\n");
 		}
 
+		 if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE) {
+		        ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
+		    }
 
 		esp_err_t ret;
 		// Initialize NVS
@@ -210,8 +259,6 @@ void app_main(void)
 		initialise_wifi();
 
 		esp_wifi_start();
-
-		print_connected_ssid();
 
 		gpio_set_level(GPIO_SHTC3, 1);
 		i2c_master_init();

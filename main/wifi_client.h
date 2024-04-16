@@ -33,7 +33,6 @@ void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *pa
 void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);
 void initialise_wifi(void);
-void print_connected_ssid(void);
 
 
 
