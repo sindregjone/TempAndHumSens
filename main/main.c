@@ -62,6 +62,31 @@ char Date_Time[100];
 SemaphoreHandle_t btSetupDoneSemaphore = NULL;
 
 
+
+void nvs_init(void)
+{
+	esp_err_t ret;
+	ret = nvs_flash_init();
+
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+	{
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		ret = nvs_flash_init();
+	}
+
+	ESP_ERROR_CHECK(ret);
+}
+
+void nvs_reinit(void)
+{
+	esp_err_t ret;
+	ret = nvs_flash_erase();
+	nvs_init();
+	ESP_ERROR_CHECK( ret );
+}
+
+
+
 void initialize_bluetooth()
 {
 
@@ -97,17 +122,8 @@ void BT_Connect()
 {
 			printf("Entering bluetooth pairing mode\r\n");
 
-			nvs_flash_erase(); //maybe also delete ssid and password in an additional way.
+			nvs_reinit();
 
-			esp_err_t ret;
-			// Initialize NVS
-			ret = nvs_flash_init();
-			if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-			{
-				ESP_ERROR_CHECK(nvs_flash_erase());
-				ret = nvs_flash_init();
-			}
-			ESP_ERROR_CHECK( ret );
 			printf("init wifi inide bt_connect\r\n");
 
 			initialise_wifi();
@@ -171,6 +187,9 @@ void bluetooth_task(void *params)
 
             BT_Connect();  // Perform connection setup
             //uxTaskGetStackHighWaterMark(NULL);
+
+
+
             printf("Bluetooth task: Setup complete, task ending.\n");
             vTaskDelete(NULL);
 	}
@@ -203,7 +222,6 @@ void gpio_button_init() {
 
 
 
-
 void app_main(void)
 {
 
@@ -233,28 +251,22 @@ void app_main(void)
 		case ESP_SLEEP_WAKEUP_GPIO:
 			printf("Wakeup reason: GPIO\r\n");
 			BT_Connect();
+
+			if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE)
+				 {
+					 ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
+				 }
 			break;
 		case ESP_SLEEP_WAKEUP_TIMER:
 			printf("Wakeup reason: Timer\r\n");
-			 xSemaphoreGive(btSetupDoneSemaphore);
 			break;
 		default:
 			printf("Not a deepsleep reset\r\n");
 		}
 
-		 if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE) {
-		        ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
-		    }
 
-		esp_err_t ret;
-		// Initialize NVS
-		ret = nvs_flash_init();
-		if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-		{
-			ESP_ERROR_CHECK(nvs_flash_erase());
-			ret = nvs_flash_init();
-		}
-		ESP_ERROR_CHECK(ret);
+
+		nvs_init(); // Initialize NVS
 
 		initialise_wifi();
 

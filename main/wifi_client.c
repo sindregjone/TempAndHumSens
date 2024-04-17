@@ -464,15 +464,3 @@ void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *pa
     }
 }
 
-void print_connected_ssid(void) {
-    if (gl_sta_connected) {
-        // Ensure that the SSID is null-terminated
-        char ssid[33]; // Maximum SSID length is 32, plus one for null-termination
-        memcpy(ssid, gl_sta_ssid, gl_sta_ssid_len);
-        ssid[gl_sta_ssid_len] = '\0'; // Null-terminate the SSID
-
-        ESP_LOGI("WIFI", "Connected to SSID: %s", ssid);
-    } else {
-        ESP_LOGI("WIFI", "Not currently connected to any SSID.");
-    }
-}
