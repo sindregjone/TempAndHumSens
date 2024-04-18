@@ -30,6 +30,7 @@
 #include "string.h"
 #include "stdbool.h"
 #include "esp_bt_main.h"
+#include "esp_task_wdt.h"
 
 #include "esp_blufi_api.h"
 #include "blufi_example.h"
@@ -140,7 +141,6 @@ void BT_Connect()
 
 			vTaskDelay(3000);
 			printf("Done setting up BT\r\n");
-			xSemaphoreGive(btSetupDoneSemaphore);
 
 }
 
@@ -157,7 +157,6 @@ void bluetooth_task(void *params)
     		printf("Bluetooth task: Notification received, proceeding...\n");
 
     		esp_bt_controller_status_t bt_status = esp_bt_controller_get_status();
-
 
     		esp_err_t ret = esp_wifi_stop();
     		if (ret != ESP_OK)
@@ -191,6 +190,7 @@ void bluetooth_task(void *params)
 
 
             printf("Bluetooth task: Setup complete, task ending.\n");
+    		xSemaphoreGive(btSetupDoneSemaphore);
             vTaskDelete(NULL);
 	}
 }
@@ -221,6 +221,14 @@ void gpio_button_init() {
     		}
 
 
+void main_task(void *params)
+{
+	while(1)
+	{
+
+	}
+}
+
 
 void app_main(void)
 {
@@ -231,7 +239,8 @@ void app_main(void)
 	        ESP_LOGE("APP_MAIN", "Failed to create semaphore");
 	        return;
 	    }
-	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 10, &bluetoothTaskHandle);
+
+	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 25, &bluetoothTaskHandle);
 		gpio_button_init();
 
 		gpio_reset_pin(GPIO_SHTC3);
@@ -251,20 +260,20 @@ void app_main(void)
 		case ESP_SLEEP_WAKEUP_GPIO:
 			printf("Wakeup reason: GPIO\r\n");
 			BT_Connect();
-
-			if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE)
-				 {
-					 ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
-				 }
 			break;
+
 		case ESP_SLEEP_WAKEUP_TIMER:
 			printf("Wakeup reason: Timer\r\n");
+			xSemaphoreGive(btSetupDoneSemaphore);
 			break;
 		default:
 			printf("Not a deepsleep reset\r\n");
 		}
 
-
+		if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE)
+			 {
+				 ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
+			 }
 
 		nvs_init(); // Initialize NVS
 
