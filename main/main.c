@@ -144,6 +144,7 @@ void BT_Connect()
 
 }
 
+
 TaskHandle_t bluetoothTaskHandle = NULL;
 
 void bluetooth_task(void *params)
@@ -221,13 +222,8 @@ void gpio_button_init() {
     		}
 
 
-void main_task(void *params)
-{
-	while(1)
-	{
 
-	}
-}
+
 
 
 void app_main(void)
@@ -240,7 +236,8 @@ void app_main(void)
 	        return;
 	    }
 
-	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 25, &bluetoothTaskHandle);
+	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 2, &bluetoothTaskHandle);
+
 		gpio_button_init();
 
 		gpio_reset_pin(GPIO_SHTC3);
