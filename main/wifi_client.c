@@ -21,6 +21,7 @@
 #define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
 
+bool is_wifi_initialized = false;
 
 wifi_config_t sta_config;
 wifi_config_t ap_config;
@@ -234,8 +235,8 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base,
     }
     return;
 }
-
-/*void initialise_wifi(void)
+/*
+void initialise_wifi(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     wifi_event_group = xEventGroupCreate();
@@ -254,19 +255,24 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base,
     ESP_ERROR_CHECK( esp_wifi_start() );
 }
 */
-void initialise_wifi(void) {
-    static bool is_wifi_initialized = false;  // State tracking
 
-    if (!is_wifi_initialized) {
-        ESP_ERROR_CHECK(esp_netif_init());
+esp_netif_t *sta_netif = NULL;
+esp_netif_t *ap_netif = NULL;
+
+void initialize_wifi(void) {
+
+
+    if (!is_wifi_initialized)
+    {
+        ESP_ERROR_CHECK(esp_netif_init()); //network interface
         wifi_event_group = xEventGroupCreate();
 
         ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-        esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+        sta_netif = esp_netif_create_default_wifi_sta();
         assert(sta_netif);
 
-        esp_netif_t *ap_netif = esp_netif_create_default_wifi_ap();
+        ap_netif = esp_netif_create_default_wifi_ap();
         assert(ap_netif);
 
         ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
@@ -274,17 +280,27 @@ void initialise_wifi(void) {
 
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+        printf("before esp_wifi_set_mode @ initialize_wifi()\r\n");
+        vTaskDelay(100);
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
         example_record_wifi_conn_info(EXAMPLE_INVALID_RSSI, EXAMPLE_INVALID_REASON);
+        vTaskDelay(100);
         ESP_ERROR_CHECK(esp_wifi_start());
+        vTaskDelay(100);
+
+        printf("Wifi initialized succesfully\r\n");
 
         is_wifi_initialized = true;  // Set flag after successful initialization
-    } else {
+    }
+    else
+    {
         ESP_LOGI("WiFi", "Wi-Fi is already initialized.");
+
+        is_wifi_initialized = true;
+
         // Optionally, handle reinitialization if required
     }
 }
-
 
 
 esp_blufi_callbacks_t example_callbacks = {
@@ -294,6 +310,37 @@ esp_blufi_callbacks_t example_callbacks = {
     .decrypt_func = blufi_aes_decrypt,
     .checksum_func = blufi_crc_checksum,
 };
+
+
+void deinitialize_wifi() {
+
+	//esp_wifi_set_mode(WIFI_MODE_NULL);
+    printf("Stopping WiFi");
+    esp_wifi_stop(); // Ignore error if not started
+
+    // Deinitialize WiFi
+    printf("Deinitializing WiFi");
+    esp_wifi_deinit();
+
+
+    // Unregister event handlers
+    printf("Unregistering Event Handlers");
+    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler);
+    esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler);
+
+    esp_event_loop_delete_default();
+
+    // Reinitialize network interface
+    printf("Reinitializing Network Interface");
+    esp_netif_deinit();
+
+    esp_netif_destroy(sta_netif);
+    esp_netif_destroy(ap_netif);
+
+    is_wifi_initialized = false;
+
+}
+
 
 void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *param)
 {

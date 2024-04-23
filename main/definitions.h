@@ -13,4 +13,6 @@
 #define CONNECTED_BIT BIT0
 
 
+extern bool is_wifi_initialized;  // State tracking
+
 #endif /* MAIN_DEFINITIONS_H_ */

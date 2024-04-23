@@ -58,10 +58,14 @@
 #define GPIO_SHTC3 7
 #define GPIO_BT 2
 
+TaskHandle_t mainTaskHandle = NULL;
+
+uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
+//gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
+//memcpy(gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.uuid.uuid128, gatts_service_uuid128_test_X, ESP_UUID_LEN_128);
+
+
 char Date_Time[100];
-
-SemaphoreHandle_t btSetupDoneSemaphore = NULL;
-
 
 
 void nvs_init(void)
@@ -90,6 +94,15 @@ void nvs_reinit(void)
 
 void initialize_bluetooth()
 {
+	esp_bt_controller_status_t bt_status = esp_bt_controller_get_status();
+	if(bt_status == ESP_BT_CONTROLLER_STATUS_ENABLED)
+	{
+		esp_bt_controller_disable();
+	}
+	if(bt_status == ESP_BT_CONTROLLER_STATUS_INITED)
+	{
+		esp_bt_controller_deinit();
+	}
 
 	esp_err_t ret;
 
@@ -125,21 +138,26 @@ void BT_Connect()
 
 			nvs_reinit();
 
-			printf("init wifi inide bt_connect\r\n");
-
-			initialise_wifi();
-
+			printf("deinit wifi inide bt_connect\r\n");
 			vTaskDelay(100);
+
+			deinitialize_wifi();
+
+			printf("init wifi inide bt_connect\r\n");
+			vTaskDelay(100);
+			initialize_wifi();
+
+			//vTaskDelay(100);
 			printf("Done init wifi inside bt_connect\r\n");
 
-			esp_wifi_start();
+			//esp_wifi_start();
 			vTaskDelay(100);
-
-			printf("Started wifi\r\n");
 
 			initialize_bluetooth();
 
-			vTaskDelay(3000);
+			printf("Done initializing bluetooth@BT_connect\r\n");
+
+			vTaskDelay(1500);
 			printf("Done setting up BT\r\n");
 
 }
@@ -151,47 +169,22 @@ void bluetooth_task(void *params)
 {
 	while(1){
 
+
 		printf("Bluetooth task started, waiting for notification...\n");
-        // Wait for the semaphore to be given by the ISR
+        // Wait for the notify to be given by the ISR
 
     		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+    		vTaskSuspend(mainTaskHandle);
+
     		printf("Bluetooth task: Notification received, proceeding...\n");
 
-    		esp_bt_controller_status_t bt_status = esp_bt_controller_get_status();
-
-    		esp_err_t ret = esp_wifi_stop();
-    		if (ret != ESP_OK)
-    		{
-    			printf("WIFI, Failed to stop Wi-Fi: %d", ret);
-    		}
-
-    		ret = esp_wifi_deinit();
-    		if (ret != ESP_OK)
-    		{
-    			printf("WIFI, Failed to deinitialize Wi-Fi: %d", ret);
-    		}
-
-
-
-
-    		if(bt_status == ESP_BT_CONTROLLER_STATUS_ENABLED)
-    		{
-    			esp_bt_controller_disable();
-    		}
-    		if(bt_status == ESP_BT_CONTROLLER_STATUS_INITED)
-    		{
-    			esp_bt_controller_deinit();
-    		}
-
-        	vTaskDelay(100);
-
             BT_Connect();  // Perform connection setup
-            //uxTaskGetStackHighWaterMark(NULL);
-
-
 
             printf("Bluetooth task: Setup complete, task ending.\n");
-    		xSemaphoreGive(btSetupDoneSemaphore);
+            vTaskDelay(100);
+            esp_restart();
+            //vTaskResume(mainTaskHandle);
             vTaskDelete(NULL);
 	}
 }
@@ -229,12 +222,8 @@ void gpio_button_init() {
 void app_main(void)
 {
 
-	 	btSetupDoneSemaphore = xSemaphoreCreateBinary();
-	    if (btSetupDoneSemaphore == NULL) {
-	        // Handle error
-	        ESP_LOGE("APP_MAIN", "Failed to create semaphore");
-	        return;
-	    }
+		mainTaskHandle = xTaskGetCurrentTaskHandle();
+
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 2, &bluetoothTaskHandle);
 
@@ -247,7 +236,7 @@ void app_main(void)
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
 
-		uint64_t wakeup_time_sec = 30;
+		uint64_t wakeup_time_sec = 15;
 		esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000ULL);
 
 
@@ -261,27 +250,33 @@ void app_main(void)
 
 		case ESP_SLEEP_WAKEUP_TIMER:
 			printf("Wakeup reason: Timer\r\n");
-			xSemaphoreGive(btSetupDoneSemaphore);
 			break;
 		default:
 			printf("Not a deepsleep reset\r\n");
 		}
 
-		if (xSemaphoreTake(btSetupDoneSemaphore, portMAX_DELAY) == pdTRUE)
-			 {
-				 ESP_LOGI("APP_MAIN", "Bluetooth setup complete, continuing...");
-			 }
+
 
 		nvs_init(); // Initialize NVS
 
-		initialise_wifi();
+		for(int i = 5; i > 0; i--)
+			{
+				printf("Before wifi init %d sec remaining\r\n", i);
+				vTaskDelay(100);
+			}
 
-		esp_wifi_start();
+		initialize_wifi();
+
+		for(int i = 5; i > 0; i--)
+				{
+					printf("After wifi init %d sec remaining\r\n", i);
+					vTaskDelay(100);
+				}
 
 		gpio_set_level(GPIO_SHTC3, 1);
 		i2c_master_init();
 
-		vTaskDelay(500);
+		vTaskDelay(50);
 
 		float temperature, humidity;
 
