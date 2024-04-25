@@ -280,15 +280,11 @@ void initialize_wifi(void) {
 
         wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
         ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-        printf("before esp_wifi_set_mode @ initialize_wifi()\r\n");
-        vTaskDelay(100);
+
         ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
         example_record_wifi_conn_info(EXAMPLE_INVALID_RSSI, EXAMPLE_INVALID_REASON);
         vTaskDelay(100);
         ESP_ERROR_CHECK(esp_wifi_start());
-        vTaskDelay(100);
-
-        printf("Wifi initialized succesfully\r\n");
 
         is_wifi_initialized = true;  // Set flag after successful initialization
     }

@@ -44,6 +44,8 @@
 #include "sys/time.h"
 #include "esp_sleep.h"
 #include "driver/gpio.h"
+#include "driver/adc.h"
+
 
 
 
@@ -53,10 +55,17 @@
 #include "http_client.h"
 #include "time_sync.h"
 #include "wifi_client.h"
+#include "battery_monitor.h"
 
 
 #define GPIO_SHTC3 7
-#define GPIO_BT 2
+#define GPIO_BT 4
+//#define ADC_PIN ADC_CHANNEL_0
+//adc, teller som gjør at den måler og laster opp nivå så og så ofte
+
+#define WAKEUP_TIME_SEC 30
+#define WAKEUP_TIME_MIN 15
+
 
 TaskHandle_t mainTaskHandle = NULL;
 
@@ -67,6 +76,14 @@ uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f
 
 char Date_Time[100];
 
+uint32_t adcVal = 0;
+
+void adcConfig(void)
+{
+	adc1_config_width(ADC_WIDTH_BIT_12);
+	adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_11);
+	adcVal = adc1_get_raw(ADC1_CHANNEL_0);
+}
 
 void nvs_init(void)
 {
@@ -138,24 +155,11 @@ void BT_Connect()
 
 			nvs_reinit();
 
-			printf("deinit wifi inide bt_connect\r\n");
-			vTaskDelay(100);
-
 			deinitialize_wifi();
 
-			printf("init wifi inide bt_connect\r\n");
-			vTaskDelay(100);
 			initialize_wifi();
 
-			//vTaskDelay(100);
-			printf("Done init wifi inside bt_connect\r\n");
-
-			//esp_wifi_start();
-			vTaskDelay(100);
-
 			initialize_bluetooth();
-
-			printf("Done initializing bluetooth@BT_connect\r\n");
 
 			vTaskDelay(1500);
 			printf("Done setting up BT\r\n");
@@ -182,7 +186,7 @@ void bluetooth_task(void *params)
             BT_Connect();  // Perform connection setup
 
             printf("Bluetooth task: Setup complete, task ending.\n");
-            vTaskDelay(100);
+            //vTaskDelay(100);
             esp_restart();
             //vTaskResume(mainTaskHandle);
             vTaskDelete(NULL);
@@ -236,8 +240,8 @@ void app_main(void)
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
 
-		uint64_t wakeup_time_sec = 15;
-		esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000ULL);
+		//uint64_t wakeup_time_sec = 15;
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL);
 
 
 		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -259,19 +263,7 @@ void app_main(void)
 
 		nvs_init(); // Initialize NVS
 
-		for(int i = 5; i > 0; i--)
-			{
-				printf("Before wifi init %d sec remaining\r\n", i);
-				vTaskDelay(100);
-			}
-
 		initialize_wifi();
-
-		for(int i = 5; i > 0; i--)
-				{
-					printf("After wifi init %d sec remaining\r\n", i);
-					vTaskDelay(100);
-				}
 
 		gpio_set_level(GPIO_SHTC3, 1);
 		i2c_master_init();
@@ -290,13 +282,19 @@ void app_main(void)
 
 			gpio_set_level(GPIO_SHTC3, 0);
 
-			//rest_get();
-			Set_SystemTime_SNTP();
+			//Set_SystemTime_SNTP();
+
 			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
-			Get_current_date_time(Date_Time);
+			//Get_current_date_time(Date_Time);
+
 
 			printf("********************************\r\n");
+			esp_log_level_set("gpio", ESP_LOG_ERROR); // Only log errors from the GPIO driver
+
+			getBatteryLevel(void);
+
 			printf("Current date and time: %s \n", Date_Time);
+
 			rest_post(temperature, humidity, Date_Time);
 			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");

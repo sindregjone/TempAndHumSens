@@ -12,6 +12,9 @@
 
 #define CONNECTED_BIT BIT0
 
+#define BATTERY_HIGH_LEVEL 2000
+#define BATTERY_LOW_LEVEL 1000
+
 
 extern bool is_wifi_initialized;  // State tracking
 
