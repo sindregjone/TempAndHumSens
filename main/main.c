@@ -76,14 +76,7 @@ uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f
 
 char Date_Time[100];
 
-uint32_t adcVal = 0;
 
-void adcConfig(void)
-{
-	adc1_config_width(ADC_WIDTH_BIT_12);
-	adc1_config_channel_atten(ADC1_CHANNEL_0,ADC_ATTEN_DB_11);
-	adcVal = adc1_get_raw(ADC1_CHANNEL_0);
-}
 
 void nvs_init(void)
 {
@@ -291,11 +284,11 @@ void app_main(void)
 			printf("********************************\r\n");
 			esp_log_level_set("gpio", ESP_LOG_ERROR); // Only log errors from the GPIO driver
 
-			getBatteryLevel(void);
+			uint32_t batteryLevel = getBatteryLevel();
 
 			printf("Current date and time: %s \n", Date_Time);
 
-			rest_post(temperature, humidity, Date_Time);
+			rest_post(temperature, humidity, Date_Time, batteryLevel);
 			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");
 
