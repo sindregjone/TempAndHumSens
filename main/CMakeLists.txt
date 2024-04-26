@@ -6,4 +6,6 @@ idf_component_register(SRCS "main.c"
                            	"time_sync.c"
                            	"wifi_client.c"
                            	"battery_monitor.c"
+                           	"NVS_Handler.c"
+                           	"BT_Handler.c"
                     INCLUDE_DIRS ".")

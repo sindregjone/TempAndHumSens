@@ -9,6 +9,7 @@
 #define MAIN_DEFINITIONS_H_
 
 #include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define CONNECTED_BIT BIT0
 
@@ -16,6 +17,7 @@
 #define BATTERY_LOW_LEVEL 1000
 
 
-extern bool is_wifi_initialized;  // State tracking
+extern TaskHandle_t mainTaskHandle;
+
 
 #endif /* MAIN_DEFINITIONS_H_ */

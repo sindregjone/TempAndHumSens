@@ -12,6 +12,8 @@
 * iOS source code: https://github.com/EspressifApp/EspBlufiForiOS
 ****************************************************************************/
 
+
+#include <NVS_Handler.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,8 +49,6 @@
 #include "driver/adc.h"
 
 
-
-
 //private files includes:
 #include "definitions.h"
 #include "shtc3_lib.h"
@@ -56,18 +56,16 @@
 #include "time_sync.h"
 #include "wifi_client.h"
 #include "battery_monitor.h"
-
+#include "NVS_Handler.h"
+#include "BT_Handler.h"
 
 #define GPIO_SHTC3 7
 #define GPIO_BT 4
 //#define ADC_PIN ADC_CHANNEL_0
 //adc, teller som gjør at den måler og laster opp nivå så og så ofte
 
-#define WAKEUP_TIME_SEC 30
+#define WAKEUP_TIME_SEC 30 //remove
 #define WAKEUP_TIME_MIN 15
-
-
-TaskHandle_t mainTaskHandle = NULL;
 
 uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
 //gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
@@ -76,116 +74,11 @@ uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f
 
 char Date_Time[100];
 
-
-
-void nvs_init(void)
-{
-	esp_err_t ret;
-	ret = nvs_flash_init();
-
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-	{
-		ESP_ERROR_CHECK(nvs_flash_erase());
-		ret = nvs_flash_init();
-	}
-
-	ESP_ERROR_CHECK(ret);
-}
-
-void nvs_reinit(void)
-{
-	esp_err_t ret;
-	ret = nvs_flash_erase();
-	nvs_init();
-	ESP_ERROR_CHECK( ret );
-}
-
-
-
-void initialize_bluetooth()
-{
-	esp_bt_controller_status_t bt_status = esp_bt_controller_get_status();
-	if(bt_status == ESP_BT_CONTROLLER_STATUS_ENABLED)
-	{
-		esp_bt_controller_disable();
-	}
-	if(bt_status == ESP_BT_CONTROLLER_STATUS_INITED)
-	{
-		esp_bt_controller_deinit();
-	}
-
-	esp_err_t ret;
-
-	ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
-
-	esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-
-	ret = esp_bt_controller_init(&bt_cfg);
-	if (ret) {
-		BLUFI_ERROR("%s initialize bt controller failed: %s\n", __func__, esp_err_to_name(ret));
-	}
-
-	ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
-	if (ret) {
-		BLUFI_ERROR("%s enable bt controller failed: %s\n", __func__, esp_err_to_name(ret));
-		return;
-	}
-
-
-	ret = esp_blufi_host_and_cb_init(&example_callbacks);
-	if (ret) {
-		BLUFI_ERROR("%s initialise failed: %s\n", __func__, esp_err_to_name(ret));
-		return;
-	}
-
-	BLUFI_INFO("BLUFI VERSION %04x\n", esp_blufi_get_version());
-
-}
-
-void BT_Connect()
-{
-			printf("Entering bluetooth pairing mode\r\n");
-
-			nvs_reinit();
-
-			deinitialize_wifi();
-
-			initialize_wifi();
-
-			initialize_bluetooth();
-
-			vTaskDelay(1500);
-			printf("Done setting up BT\r\n");
-
-}
-
-
+TaskHandle_t mainTaskHandle = NULL;
 TaskHandle_t bluetoothTaskHandle = NULL;
 
-void bluetooth_task(void *params)
-{
-	while(1){
 
-
-		printf("Bluetooth task started, waiting for notification...\n");
-        // Wait for the notify to be given by the ISR
-
-    		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-    		vTaskSuspend(mainTaskHandle);
-
-    		printf("Bluetooth task: Notification received, proceeding...\n");
-
-            BT_Connect();  // Perform connection setup
-
-            printf("Bluetooth task: Setup complete, task ending.\n");
-            //vTaskDelay(100);
-            esp_restart();
-            //vTaskResume(mainTaskHandle);
-            vTaskDelete(NULL);
-	}
-}
-
+void bluetooth_task(void *params);
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
@@ -211,8 +104,28 @@ void gpio_button_init() {
     		    gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
     		}
 
+uint32_t updateBootCounter(void)
+{
+	nvs_handle_t bootCounterHandle;
 
+	nvs_open("storage", NVS_READWRITE, &bootCounterHandle);
 
+	uint32_t bootCount = 0;
+
+	nvs_get_u32(bootCounterHandle, "boot_count", &bootCount);
+
+	bootCount ++;
+
+	nvs_set_u32(bootCounterHandle, "boot_count", bootCount);
+
+	nvs_commit(bootCounterHandle);
+
+	nvs_close(bootCounterHandle);
+
+	printf("Boot Count: %ld\n\r", bootCount);
+	return bootCount;
+
+}
 
 
 
@@ -224,8 +137,9 @@ void app_main(void)
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 2, &bluetoothTaskHandle);
 
-		gpio_button_init();
+		float temperature, humidity;
 
+		gpio_button_init();
 		gpio_reset_pin(GPIO_SHTC3);
 		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
 
@@ -252,8 +166,6 @@ void app_main(void)
 			printf("Not a deepsleep reset\r\n");
 		}
 
-
-
 		nvs_init(); // Initialize NVS
 
 		initialize_wifi();
@@ -261,24 +173,17 @@ void app_main(void)
 		gpio_set_level(GPIO_SHTC3, 1);
 		i2c_master_init();
 
-		vTaskDelay(50);
-
-		float temperature, humidity;
-
-		if (read_shtc3(&temperature, &humidity) == ESP_OK) {
-
-			printf("\n Temperature: %.2f C, Humidity: %.2f%% \r\n", temperature, humidity);
-			}
-		else {
+		if (read_shtc3(&temperature, &humidity) != ESP_OK)
+		{
 			printf("\n Failed to read temperature and humidity \r\n");
 		}
 
 			gpio_set_level(GPIO_SHTC3, 0);
 
-			//Set_SystemTime_SNTP();
+			Set_SystemTime_SNTP();
 
 			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
-			//Get_current_date_time(Date_Time);
+			Get_current_date_time(Date_Time);
 
 
 			printf("********************************\r\n");
@@ -289,6 +194,9 @@ void app_main(void)
 			printf("Current date and time: %s \n", Date_Time);
 
 			rest_post(temperature, humidity, Date_Time, batteryLevel);
+
+			updateBootCounter();
+
 			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");
 
