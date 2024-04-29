@@ -13,7 +13,7 @@
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #include "definitions.h"
-
+#include "string.h"
 
 
 
@@ -38,7 +38,7 @@ void calibrateADC(adc_unit_t unit, adc_atten_t atten, adc_bits_width_t width, ui
 	  esp_adc_cal_characterize(unit, atten, width, default_vref, adc_chars);
 }
 
-uint32_t getBatteryLevel(void)
+void getBatteryLevel(char *batLevel)
 {
 
 	uint32_t adcVal = 0;
@@ -55,22 +55,22 @@ uint32_t getBatteryLevel(void)
 	if(BATTERY_HIGH_LEVEL <= adcVoltage)
 	{
 		printf("Battery condition: High\r\n");
-		return 3;
+		strcpy(batLevel, "HIGH");
 	}
 
 	else if(BATTERY_LOW_LEVEL < adcVoltage && adcVoltage <= BATTERY_HIGH_LEVEL)
 	{
 		printf("Battery condition: Medium\r\n");
-		return 2;
+		strcpy(batLevel, "MEDIUM");
 	}
 
 	else if(adcVoltage < BATTERY_LOW_LEVEL)
 	{
 		printf("Battery condition: Low\r\n");
-		return 1;
+		strcpy(batLevel, "LOW");
 	}
 	else
 		printf("Could not get battery condition\r\n");
-	return 0;
+	//return 0;
 
 }

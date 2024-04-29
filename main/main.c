@@ -33,6 +33,7 @@
 #include "stdbool.h"
 #include "esp_bt_main.h"
 #include "esp_task_wdt.h"
+#include "nvs.h"
 
 #include "esp_blufi_api.h"
 #include "blufi_example.h"
@@ -58,14 +59,6 @@
 #include "battery_monitor.h"
 #include "NVS_Handler.h"
 #include "BT_Handler.h"
-
-#define GPIO_SHTC3 7
-#define GPIO_BT 4
-//#define ADC_PIN ADC_CHANNEL_0
-//adc, teller som gjør at den måler og laster opp nivå så og så ofte
-
-#define WAKEUP_TIME_SEC 30 //remove
-#define WAKEUP_TIME_MIN 15
 
 uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
 //gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
@@ -104,36 +97,15 @@ void gpio_button_init() {
     		    gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
     		}
 
-uint32_t updateBootCounter(void)
-{
-	nvs_handle_t bootCounterHandle;
 
-	nvs_open("storage", NVS_READWRITE, &bootCounterHandle);
-
-	uint32_t bootCount = 0;
-
-	nvs_get_u32(bootCounterHandle, "boot_count", &bootCount);
-
-	bootCount ++;
-
-	nvs_set_u32(bootCounterHandle, "boot_count", bootCount);
-
-	nvs_commit(bootCounterHandle);
-
-	nvs_close(bootCounterHandle);
-
-	printf("Boot Count: %ld\n\r", bootCount);
-	return bootCount;
-
-}
 
 
 
 void app_main(void)
 {
+	char batteryLevel[20];
 
 		mainTaskHandle = xTaskGetCurrentTaskHandle();
-
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 2, &bluetoothTaskHandle);
 
@@ -143,12 +115,11 @@ void app_main(void)
 		gpio_reset_pin(GPIO_SHTC3);
 		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
 
-
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
 
 		//uint64_t wakeup_time_sec = 15;
-		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL);
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_SEC * 1000000ULL);
 
 
 		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
@@ -180,22 +151,33 @@ void app_main(void)
 
 			gpio_set_level(GPIO_SHTC3, 0);
 
-			Set_SystemTime_SNTP();
+			//Set_SystemTime_SNTP();
 
 			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
-			Get_current_date_time(Date_Time);
+			//Get_current_date_time(Date_Time);
+
 
 
 			printf("********************************\r\n");
 			esp_log_level_set("gpio", ESP_LOG_ERROR); // Only log errors from the GPIO driver
 
-			uint32_t batteryLevel = getBatteryLevel();
+			uint32_t localBootCount = updateBootCounter();
+
+			//uint32_t batteryLevel;
+
+			NVSgetBatteryLevel(batteryLevel, sizeof(batteryLevel));
+
+			if((localBootCount %5) == 0 || localBootCount == 1)
+			{
+				printf("Updating battery Level\r\n");
+				getBatteryLevel(batteryLevel);
+				NVSsetBatteryLevel(batteryLevel);
+			}
 
 			printf("Current date and time: %s \n", Date_Time);
 
 			rest_post(temperature, humidity, Date_Time, batteryLevel);
 
-			updateBootCounter();
 
 			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");

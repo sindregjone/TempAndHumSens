@@ -48,23 +48,22 @@ esp_err_t client_event_post_handler(esp_http_client_event_handle_t evt)
 }
 
 
-void rest_post(float temp, float hum, char time[100], uint32_t batteryLevel)
+void rest_post(float temp, float hum, char time[100], char batteryLevel[20])
 {
 	const char *post_data;
     char temp_str[32];
     char hum_str[32];
-    char batteryLevel_str[32];
 
     snprintf(temp_str, sizeof(temp_str), "%.1f°C", temp);
     snprintf(hum_str, sizeof(hum_str), "%d%%", (int)hum);
-    snprintf(batteryLevel_str, sizeof(batteryLevel_str), "%ld", batteryLevel);
+    //snprintf(batteryLevel_str, sizeof(batteryLevel_str), "%ld", batteryLevel);
 
 	cJSON *root = cJSON_CreateObject();
 	cJSON_AddStringToObject(root, "SensorID", "1");
 	cJSON_AddStringToObject(root, "Timestamp", time);
 	cJSON_AddStringToObject(root, "Temperature", temp_str);
 	cJSON_AddStringToObject(root, "Humidity", hum_str);
-	cJSON_AddStringToObject(root, "Battery Level", batteryLevel_str);
+	cJSON_AddStringToObject(root, "Battery Level", batteryLevel);
 
 
 	post_data = cJSON_Print(root);
@@ -93,6 +92,3 @@ void rest_post(float temp, float hum, char time[100], uint32_t batteryLevel)
     cJSON_Delete(root);
 }
 
-// http://10.225.148.229:3000
-//http://httpbin.org/get
-//http://midtskips.no/bac24el04/receive_post.php
