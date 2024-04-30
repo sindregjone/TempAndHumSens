@@ -14,16 +14,17 @@
 #define CONNECTED_BIT BIT0
 
 #define GPIO_SHTC3 7
-#define GPIO_BT 2 //shift back to 4
+#define GPIO_BT 4 //shift back to 4
 
 #define WAKEUP_TIME_SEC 5 //remove
 #define WAKEUP_TIME_MIN 15
+
+#define BATTERY_UPDATE_INTERVAL 5 //sets the interval of how often the battery level should be updated
 
 
 //voltage from battery after voltage divider has range 2.1V - 3.0V
 #define BATTERY_HIGH_LEVEL 2700 //approx 3.85V from battery
 #define BATTERY_LOW_LEVEL 2400 //approx 3.40V from battery
-
 
 extern TaskHandle_t mainTaskHandle;
 

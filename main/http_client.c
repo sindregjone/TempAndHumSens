@@ -48,7 +48,7 @@ esp_err_t client_event_post_handler(esp_http_client_event_handle_t evt)
 }
 
 
-void rest_post(float temp, float hum, char time[100], char batteryLevel[20])
+void rest_post(char sensorID[30],float temp, float hum, char time[100], char batteryLevel[10])
 {
 	const char *post_data;
     char temp_str[32];
@@ -59,7 +59,7 @@ void rest_post(float temp, float hum, char time[100], char batteryLevel[20])
     //snprintf(batteryLevel_str, sizeof(batteryLevel_str), "%ld", batteryLevel);
 
 	cJSON *root = cJSON_CreateObject();
-	cJSON_AddStringToObject(root, "SensorID", "1");
+	cJSON_AddStringToObject(root, "SensorID", sensorID);
 	cJSON_AddStringToObject(root, "Timestamp", time);
 	cJSON_AddStringToObject(root, "Temperature", temp_str);
 	cJSON_AddStringToObject(root, "Humidity", hum_str);

@@ -50,27 +50,26 @@ void getBatteryLevel(char *batLevel)
 
 	adcVal = adc1_get_raw(ADC1_CHANNEL_0);
 	adcVoltage = esp_adc_cal_raw_to_voltage(adcVal, adc_chars);
-	//printf("Battery voltage: %ld mV \r\n", adcVoltage);
+	printf("Battery voltage: %ld mV \r\n", adcVoltage);
 
 	if(BATTERY_HIGH_LEVEL <= adcVoltage)
 	{
-		printf("Battery condition: High\r\n");
+		printf("Battery level: High\r\n");
 		strcpy(batLevel, "HIGH");
 	}
 
 	else if(BATTERY_LOW_LEVEL < adcVoltage && adcVoltage <= BATTERY_HIGH_LEVEL)
 	{
-		printf("Battery condition: Medium\r\n");
+		printf("Battery level: Medium\r\n");
 		strcpy(batLevel, "MEDIUM");
 	}
 
 	else if(adcVoltage < BATTERY_LOW_LEVEL)
 	{
-		printf("Battery condition: Low\r\n");
+		printf("Battery level: Low\r\n");
 		strcpy(batLevel, "LOW");
 	}
 	else
 		printf("Could not get battery condition\r\n");
-	//return 0;
 
 }

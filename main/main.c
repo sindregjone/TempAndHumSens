@@ -37,9 +37,7 @@
 
 #include "esp_blufi_api.h"
 #include "blufi_example.h"
-
 #include "esp_blufi.h"
-
 
 #include "driver/i2c.h"
 #include "cJSON.h"
@@ -48,7 +46,6 @@
 #include "esp_sleep.h"
 #include "driver/gpio.h"
 #include "driver/adc.h"
-
 
 //private files includes:
 #include "definitions.h"
@@ -59,6 +56,9 @@
 #include "battery_monitor.h"
 #include "NVS_Handler.h"
 #include "BT_Handler.h"
+
+#define BLUETOOTH_TASK_STACK_SIZE 4096
+#define BLUETOOTH_TASK_PRIORITY 2
 
 uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
 //gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
@@ -103,11 +103,12 @@ void gpio_button_init() {
 
 void app_main(void)
 {
-	char batteryLevel[20];
+		char batteryLevel[10];
+		char deviceName[30];
 
 		mainTaskHandle = xTaskGetCurrentTaskHandle();
 
-	    xTaskCreate(bluetooth_task, "bluetooth_task", 4096, NULL, 2, &bluetoothTaskHandle);
+	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle);
 
 		float temperature, humidity;
 
@@ -118,11 +119,10 @@ void app_main(void)
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
 
-		//uint64_t wakeup_time_sec = 15;
 		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_SEC * 1000000ULL);
 
 
-		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //get the reason the uC was woken up
 		switch(wakeup_reason)
 		{
 		case ESP_SLEEP_WAKEUP_GPIO:
@@ -144,7 +144,7 @@ void app_main(void)
 		gpio_set_level(GPIO_SHTC3, 1);
 		i2c_master_init();
 
-		if (read_shtc3(&temperature, &humidity) != ESP_OK)
+		if (read_shtc3(&temperature, &humidity) != ESP_OK) //get the temp and hum from SHTC3 sensor
 		{
 			printf("\n Failed to read temperature and humidity \r\n");
 		}
@@ -152,7 +152,6 @@ void app_main(void)
 			gpio_set_level(GPIO_SHTC3, 0);
 
 			//Set_SystemTime_SNTP();
-
 			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
 			//Get_current_date_time(Date_Time);
 
@@ -165,18 +164,21 @@ void app_main(void)
 
 			//uint32_t batteryLevel;
 
-			NVSgetBatteryLevel(batteryLevel, sizeof(batteryLevel));
+			NVSmanageBatteryLevel(GET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel));
 
-			if((localBootCount %5) == 0 || localBootCount == 1)
+			if((localBootCount % BATTERY_UPDATE_INTERVAL) == 0 || localBootCount == 1)
 			{
 				printf("Updating battery Level\r\n");
 				getBatteryLevel(batteryLevel);
-				NVSsetBatteryLevel(batteryLevel);
+				NVSmanageBatteryLevel(SET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel));
 			}
 
 			printf("Current date and time: %s \n", Date_Time);
 
-			rest_post(temperature, humidity, Date_Time, batteryLevel);
+
+			NVSmanageSensorID(GET_SENSOR_ID, deviceName, sizeof(deviceName));
+
+			rest_post(deviceName, temperature, humidity, Date_Time, batteryLevel);
 
 
 			printf("********************************\r\n");
@@ -188,3 +190,5 @@ void app_main(void)
 			esp_deep_sleep_start();
 
 }
+
+

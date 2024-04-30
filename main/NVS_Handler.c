@@ -61,32 +61,44 @@ uint32_t updateBootCounter(void)
 
 nvs_handle_t batteryLevelHandle;
 
-void NVSsetBatteryLevel(char *batLevel)
+
+void NVSmanageBatteryLevel(int operation, char* batLevel, size_t size)
 {
 
 	nvs_open("Battery", NVS_READWRITE, &batteryLevelHandle);
 
-	//nvs_set_u32(batteryLevelHandle, "batteryLevel", batteryLevel);
-	nvs_set_str(batteryLevelHandle, "batteryLevel", batLevel);
+	if(operation == SET_BATTERY_LEVEL)
+	{
+		nvs_set_str(batteryLevelHandle, "batteryLevel", batLevel);
+		nvs_commit(batteryLevelHandle);
 
-	nvs_commit(batteryLevelHandle);
+		printf("Battery level set to: %s\n\r", batLevel);
+	}
+	else if(operation == GET_BATTERY_LEVEL)
+	{
+		nvs_get_str(batteryLevelHandle, "batteryLevel", batLevel, &size);
+	}
 
 	nvs_close(batteryLevelHandle);
-
-	printf("Battery Level: %s\n\r", batLevel);
-	//return batLevel;
 }
 
-void NVSgetBatteryLevel(char *batLevel, size_t size)
+nvs_handle_t SensorIDHandle;
+
+void NVSmanageSensorID(int operation, char* sensorID, size_t size)
 {
-	//char batLevel[20];
+	nvs_open("ID", NVS_READWRITE, &SensorIDHandle);
 
-	nvs_open("Battery", NVS_READWRITE, &batteryLevelHandle);
+		if(operation == SET_SENSOR_ID)
+		{
+			nvs_set_str(SensorIDHandle, "ID", sensorID);
+			nvs_commit(SensorIDHandle);
 
-	nvs_get_str(batteryLevelHandle, "batteryLevel", batLevel, &size);
+			printf("SensorID set to: %s\n\r", sensorID);
+		}
+		else if(operation == GET_SENSOR_ID)
+		{
+			nvs_get_str(SensorIDHandle, "ID", sensorID, &size);
+		}
 
-	nvs_close(batteryLevelHandle);
-
-	//return batLevel;
-
+		nvs_close(SensorIDHandle);
 }

@@ -28,6 +28,7 @@ extern int gl_sta_ssid_len;
 extern bool gl_sta_is_connecting;
 
 extern esp_blufi_callbacks_t example_callbacks;
+extern char* deviceName;
 
 void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *param);
 void ip_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data);

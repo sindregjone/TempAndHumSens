@@ -16,7 +16,13 @@
 #include "esp_log.h"
 #include "definitions.h"
 #include "esp_blufi.h"
+#include "NVS_Handler.h"
 
+
+
+#include "definitions.h"
+
+char* deviceName = NULL;
 
 #define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
@@ -480,9 +486,17 @@ void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *pa
         }
         break;
     }
-    case ESP_BLUFI_EVENT_RECV_CUSTOM_DATA:
-        BLUFI_INFO("Recv Custom Data %" PRIu32 "\n", param->custom_data.data_len);
-        esp_log_buffer_hex("Custom Data", param->custom_data.data, param->custom_data.data_len);
+    case ESP_BLUFI_EVENT_RECV_CUSTOM_DATA: //this has been changed
+        BLUFI_INFO("Recv Custom Data Size: %" PRIu32 "\n\r", param->custom_data.data_len);
+        esp_log_buffer_hex("Custom Data: ", param->custom_data.data, param->custom_data.data_len);
+        deviceName = malloc(param->custom_data.data_len + 1);
+        memcpy(deviceName, param->custom_data.data, param->custom_data.data_len);
+        deviceName[param->custom_data.data_len] = '\0';
+
+        NVSmanageSensorID(SET_SENSOR_ID, deviceName, sizeof(deviceName));
+
+        ESP_LOGI("BLUFI", "Device name set to: %s", deviceName);
+
         break;
 	case ESP_BLUFI_EVENT_RECV_USERNAME:
         /* Not handle currently */
