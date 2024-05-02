@@ -299,8 +299,6 @@ void initialize_wifi(void) {
         ESP_LOGI("WiFi", "Wi-Fi is already initialized.");
 
         is_wifi_initialized = true;
-
-        // Optionally, handle reinitialization if required
     }
 }
 

@@ -60,7 +60,7 @@
 #define BLUETOOTH_TASK_STACK_SIZE 4096
 #define BLUETOOTH_TASK_PRIORITY 2
 
-uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
+//uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
 //gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
 //memcpy(gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.uuid.uuid128, gatts_service_uuid128_test_X, ESP_UUID_LEN_128);
 
@@ -105,29 +105,28 @@ void app_main(void)
 {
 		char batteryLevel[10];
 		char deviceName[30];
-
-		mainTaskHandle = xTaskGetCurrentTaskHandle();
-
-	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle);
-
 		float temperature, humidity;
+
+		mainTaskHandle = xTaskGetCurrentTaskHandle(); //get the task handle from mainTask
+
+	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle); //starts the bluetooth task
 
 		gpio_button_init();
 		gpio_reset_pin(GPIO_SHTC3);
 		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
 
 	    //config wake-up sources
-	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW);
+	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW); //wake up source that wakes up the uC when a button is pressed
 
-		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_SEC * 1000000ULL);
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_SEC * 1000000ULL); //wake up source that wakes up the uC after a given time
 
 
-		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //get the reason the uC was woken up
-		switch(wakeup_reason)
+		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //gets the reason why the uC was woken up
+		switch(wakeup_reason) //check what the reason for wakeup is
 		{
 		case ESP_SLEEP_WAKEUP_GPIO:
 			printf("Wakeup reason: GPIO\r\n");
-			BT_Connect();
+			BT_Connect(); //starts the bluetooth connection for setting up wifi
 			break;
 
 		case ESP_SLEEP_WAKEUP_TIMER:
@@ -138,10 +137,12 @@ void app_main(void)
 		}
 
 		nvs_init(); // Initialize NVS
+		vTaskDelay(100);
 
-		initialize_wifi();
+		initialize_wifi(); //initializes wifi
+		vTaskDelay(100);
 
-		gpio_set_level(GPIO_SHTC3, 1);
+		gpio_set_level(GPIO_SHTC3, 1); //turns the SHTC3 sensor ON
 		i2c_master_init();
 
 		if (read_shtc3(&temperature, &humidity) != ESP_OK) //get the temp and hum from SHTC3 sensor
@@ -149,7 +150,7 @@ void app_main(void)
 			printf("\n Failed to read temperature and humidity \r\n");
 		}
 
-			gpio_set_level(GPIO_SHTC3, 0);
+			gpio_set_level(GPIO_SHTC3, 0); //turns the SHTC3 sensor OFF
 
 			//Set_SystemTime_SNTP();
 			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
@@ -160,34 +161,31 @@ void app_main(void)
 			printf("********************************\r\n");
 			esp_log_level_set("gpio", ESP_LOG_ERROR); // Only log errors from the GPIO driver
 
-			uint32_t localBootCount = updateBootCounter();
+			uint32_t localBootCount = updateBootCounter(); //updates the boot counter
 
-			//uint32_t batteryLevel;
+			NVSmanageBatteryLevel(GET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel)); //gets the last measured battery level from NVS
 
-			NVSmanageBatteryLevel(GET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel));
-
-			if((localBootCount % BATTERY_UPDATE_INTERVAL) == 0 || localBootCount == 1)
+			if((localBootCount % BATTERY_UPDATE_INTERVAL) == 0 || localBootCount == 1) //checks if it is time for measuring the battery level
 			{
 				printf("Updating battery Level\r\n");
-				getBatteryLevel(batteryLevel);
-				NVSmanageBatteryLevel(SET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel));
+				getBatteryLevel(batteryLevel); //measures the battery level with ADC
+				NVSmanageBatteryLevel(SET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel)); //updates the battery level
 			}
 
 			printf("Current date and time: %s \n", Date_Time);
 
+			NVSmanageSensorID(GET_SENSOR_ID, deviceName, sizeof(deviceName)); //gets the SensorID from NVS
 
-			NVSmanageSensorID(GET_SENSOR_ID, deviceName, sizeof(deviceName));
-
-			rest_post(deviceName, temperature, humidity, Date_Time, batteryLevel);
+			rest_post(deviceName, temperature, humidity, Date_Time, batteryLevel); //post the JSON file to the server
 
 
 			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");
 
-			esp_wifi_stop();
-			esp_bt_controller_disable();
+			esp_wifi_stop(); //stops wifi
+			esp_bt_controller_disable(); //disables the bt controller
 
-			esp_deep_sleep_start();
+			esp_deep_sleep_start(); //sends the uC into deep sleep
 
 }
 

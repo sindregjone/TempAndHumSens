@@ -63,7 +63,7 @@ void rest_post(char sensorID[30],float temp, float hum, char time[100], char bat
 	cJSON_AddStringToObject(root, "Timestamp", time);
 	cJSON_AddStringToObject(root, "Temperature", temp_str);
 	cJSON_AddStringToObject(root, "Humidity", hum_str);
-	cJSON_AddStringToObject(root, "Battery Level", batteryLevel);
+	cJSON_AddStringToObject(root, "Battery_Level", batteryLevel);
 
 
 	post_data = cJSON_Print(root);

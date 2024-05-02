@@ -20,6 +20,7 @@
 #include "wifi_client.h"
 #include "NVS_Handler.h"
 #include "BT_Handler.h"
+#include "definitions.h"
 
 void initialize_bluetooth()
 {
@@ -74,7 +75,7 @@ void BT_Connect()
 
 			initialize_bluetooth();
 
-			vTaskDelay(3000);
+			vTaskDelay(BT_CONNECT_TIME_SEC *100);
 			printf("Done setting up BT\r\n");
 }
 
