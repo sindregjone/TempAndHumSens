@@ -9,10 +9,11 @@
 #include "esp_http_client.h"
 #include "esp_log.h"
 #include "cJSON.h"
-#include <string.h>
+#include "string.h"
 #include "wifi_client.h"
+#include "definitions.h"
 
-
+/*
 esp_err_t client_event_get_handler(esp_http_client_event_handle_t evt)
 {
     switch (evt->event_id)
@@ -31,7 +32,7 @@ esp_err_t client_event_get_handler(esp_http_client_event_handle_t evt)
 void rest_get()
 {
     esp_http_client_config_t config_get = {
-        .url = "http://10.225.148.229:3000",
+        .url = SERVER_URL,
         .method = HTTP_METHOD_GET,
         .cert_pem = NULL,
         .event_handler = client_event_get_handler};
@@ -40,7 +41,7 @@ void rest_get()
     esp_http_client_perform(client);
     esp_http_client_cleanup(client);
 }
-
+*/
 
 esp_err_t client_event_post_handler(esp_http_client_event_handle_t evt)
 {
@@ -48,7 +49,7 @@ esp_err_t client_event_post_handler(esp_http_client_event_handle_t evt)
 }
 
 
-void rest_post(char sensorID[30],float temp, float hum, char time[100], char batteryLevel[10])
+void rest_post(char sensorID[30],float temp, float hum, char batteryLevel[10])
 {
 	const char *post_data;
     char temp_str[32];
@@ -56,11 +57,9 @@ void rest_post(char sensorID[30],float temp, float hum, char time[100], char bat
 
     snprintf(temp_str, sizeof(temp_str), "%.1f°C", temp);
     snprintf(hum_str, sizeof(hum_str), "%d%%", (int)hum);
-    //snprintf(batteryLevel_str, sizeof(batteryLevel_str), "%ld", batteryLevel);
 
 	cJSON *root = cJSON_CreateObject();
 	cJSON_AddStringToObject(root, "SensorID", sensorID);
-	cJSON_AddStringToObject(root, "Timestamp", time);
 	cJSON_AddStringToObject(root, "Temperature", temp_str);
 	cJSON_AddStringToObject(root, "Humidity", hum_str);
 	cJSON_AddStringToObject(root, "Battery_Level", batteryLevel);

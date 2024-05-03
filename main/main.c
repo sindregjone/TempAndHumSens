@@ -12,44 +12,39 @@
 * iOS source code: https://github.com/EspressifApp/EspBlufiForiOS
 ****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include "driver/gpio.h"
+#include "driver/adc.h"
 #include "esp_system.h"
 #include "esp_mac.h"
 #include "esp_log.h"
 #include "esp_bt.h"
 #include "esp_sleep.h"
-#include "driver/gpio.h"
-#include "driver/adc.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+
 
 //private files includes:
-#include "definitions.h"
-#include "shtc3_lib.h"
-#include "http_client.h"
-#include "time_sync.h"
-#include "wifi_client.h"
 #include "battery_monitor.h"
-#include "NVS_Handler.h"
 #include "BT_Handler.h"
+#include "definitions.h"
+#include "http_client.h"
+#include "NVS_Handler.h"
+#include "shtc3_lib.h"
+#include "wifi_client.h"
 
-#define BLUETOOTH_TASK_STACK_SIZE 4096
-#define BLUETOOTH_TASK_PRIORITY 2
+
+
 
 //uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
 //gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
 //memcpy(gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.uuid.uuid128, gatts_service_uuid128_test_X, ESP_UUID_LEN_128);
 
 
-char Date_Time[100];
-
-TaskHandle_t mainTaskHandle = NULL;
-TaskHandle_t bluetoothTaskHandle = NULL;
-
-
-void bluetooth_task(void *params);
+TaskHandle_t mainTaskHandle = NULL; //initialize the task handle for the main task to NULL
+TaskHandle_t bluetoothTaskHandle = NULL; //initialize the task handle for the bluetooth task to NULL
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
@@ -60,20 +55,19 @@ void IRAM_ATTR gpio_isr_handler(void* arg)
     }
 
 
-void gpio_button_init()
+void gpio_BT_button_init()
 {
     	gpio_config_t io_conf;
+
       	io_conf.intr_type = GPIO_INTR_NEGEDGE; // Trigger on falling edge
     	io_conf.mode = GPIO_MODE_INPUT;
    	    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
  	    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
         io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
- 	    gpio_config(&io_conf);
 
- 	    // Install GPIO ISR service
-    	gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
-    	// Attach the interrupt service routine
-        gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
+ 	    gpio_config(&io_conf);
+    	gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);// Install GPIO ISR service
+        gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);// Attach the interrupt service routine
 }
 
 void app_main(void)
@@ -86,11 +80,12 @@ void app_main(void)
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle); //starts the bluetooth task
 
-		gpio_button_init();
-		gpio_reset_pin(GPIO_SHTC3);
-		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT);
+	    gpio_BT_button_init(); //initializes the BT button
 
-	    //config wake-up sources
+		gpio_reset_pin(GPIO_SHTC3); //resets the SHTC3_GPIO
+		gpio_set_direction(GPIO_SHTC3, GPIO_MODE_OUTPUT); //Sets the GPIO_SHTC3 as an output
+
+	    //config wake-up sources:
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW); //wake up source that wakes up the uC when a button is pressed
 
 		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL); //wake up source that wakes up the uC after a given time
@@ -118,7 +113,7 @@ void app_main(void)
 		vTaskDelay(100);
 
 		gpio_set_level(GPIO_SHTC3, 1); //turns the SHTC3 sensor ON
-		i2c_master_init();
+		i2c_master_init(); //initialize i2c
 
 		if (read_shtc3(&temperature, &humidity) != ESP_OK) //get the temp and hum from SHTC3 sensor
 		{
@@ -127,13 +122,7 @@ void app_main(void)
 
 			gpio_set_level(GPIO_SHTC3, 0); //turns the SHTC3 sensor OFF
 
-			//Set_SystemTime_SNTP();
-			//set_system_time_manually(2028, 2, 29, 12, 00, 00);
-			//Get_current_date_time(Date_Time);
 
-
-
-			printf("********************************\r\n");
 			esp_log_level_set("gpio", ESP_LOG_ERROR); // Only log errors from the GPIO driver
 
 			uint32_t localBootCount = updateBootCounter(); //updates the boot counter
@@ -147,16 +136,11 @@ void app_main(void)
 				NVSmanageBatteryLevel(SET_BATTERY_LEVEL, batteryLevel, sizeof(batteryLevel)); //updates the battery level
 			}
 
-			printf("Current date and time: %s \n", Date_Time);
-
-
 
 			NVSmanageSensorID(GET_SENSOR_ID, deviceName, sizeof(deviceName)); //gets the SensorID from NVS
 
-			rest_post(deviceName, temperature, humidity, Date_Time, batteryLevel); //post the JSON file to the server
+			rest_post(deviceName, temperature, humidity, batteryLevel); //post the JSON file to the server
 
-
-			printf("********************************\r\n");
 			printf("Entering Deep-Sleep\r\n");
 
 			esp_wifi_stop(); //stops wifi
