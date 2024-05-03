@@ -3,7 +3,10 @@
  *
  *  Created on: 20. mars 2024
  *      Author: sindregjone
+ *      Inspired by https://github.com/SIMS-IOT-Devices/FreeRTOS-ESP-IDF-HTTP-Client/blob/main/proj5.c
  */
+
+
 
 #include "http_client.h"
 #include "esp_http_client.h"

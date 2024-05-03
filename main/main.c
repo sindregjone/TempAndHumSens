@@ -32,7 +32,7 @@
 #include "definitions.h"
 #include "http_client.h"
 #include "NVS_Handler.h"
-#include "shtc3_lib.h"
+#include "SHTC3.h"
 #include "wifi_client.h"
 
 

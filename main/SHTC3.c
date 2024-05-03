@@ -1,6 +1,13 @@
+/*
+ * shtc3.c
+ *
+ * 	Created on: 12. mars 2024
+ *      Author: sindregjone
+ */
+
 #include "driver/i2c.h"
 #include "esp_log.h"
-#include <stdio.h>
+#include "stdio.h"
 
 #define I2C_MASTER_SCL_IO    6    // SCL Pin
 #define I2C_MASTER_SDA_IO    5    // SDA Pin
