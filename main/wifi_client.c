@@ -487,13 +487,34 @@ void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *pa
     case ESP_BLUFI_EVENT_RECV_CUSTOM_DATA: //this has been changed
         BLUFI_INFO("Recv Custom Data Size: %" PRIu32 "\n\r", param->custom_data.data_len);
         esp_log_buffer_hex("Custom Data: ", param->custom_data.data, param->custom_data.data_len);
-        deviceName = malloc(param->custom_data.data_len + 1);
-        memcpy(deviceName, param->custom_data.data, param->custom_data.data_len);
-        deviceName[param->custom_data.data_len] = '\0';
 
-        NVSmanageSensorID(SET_SENSOR_ID, deviceName, sizeof(deviceName));
+        if(param->custom_data.data_len > 0)
+        {
 
-        ESP_LOGI("BLUFI", "Device name set to: %s", deviceName);
+
+			deviceName = malloc(param->custom_data.data_len + 1);
+			if(deviceName != NULL)
+			{
+				memcpy(deviceName, param->custom_data.data, param->custom_data.data_len);
+				deviceName[param->custom_data.data_len] = '\0';
+				NVSmanageSensorID(SET_SENSOR_ID, deviceName, sizeof(deviceName));
+				ESP_LOGI("BLUFI", "Device name set to: %s", deviceName);
+			}
+			else
+			{
+				ESP_LOGI("BLUFI", "Failed to allocate memory for device name");
+			}
+        }
+        else
+        {
+        	ESP_LOGI("BLUFI", "Recieved custom data is empty");
+        	deviceName = DEFAULT_SENSOR_ID;
+
+        }
+        if(deviceName != (DEFAULT_SENSOR_ID))
+        {
+        	free(deviceName);
+        }
 
         break;
 	case ESP_BLUFI_EVENT_RECV_USERNAME:

@@ -11,6 +11,7 @@
 #include "esp_log.h"
 #include "NVS_Handler.h"
 #include "string.h"
+#include "definitions.h"
 
 void nvs_init(void)
 {
@@ -97,6 +98,12 @@ void NVSmanageSensorID(int operation, char* sensorID, size_t size)
 		}
 		else if(operation == GET_SENSOR_ID)
 		{
+			esp_err_t err = nvs_get_str(SensorIDHandle, "ID", sensorID, &size);
+
+			if(err == ESP_ERR_NVS_NOT_FOUND || size == 0)
+			{
+				nvs_set_str(SensorIDHandle, "ID", DEFAULT_SENSOR_ID);
+			}
 			nvs_get_str(SensorIDHandle, "ID", sensorID, &size);
 		}
 

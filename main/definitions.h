@@ -13,13 +13,15 @@
 
 #define CONNECTED_BIT BIT0
 
+#define DEFAULT_SENSOR_ID "defaultSensorID"
+
 #define GPIO_SHTC3 7
 #define GPIO_BT 4 //shift back to 4
 
 #define WAKEUP_TIME_SEC 10 //remove
-#define WAKEUP_TIME_MIN 15
+#define WAKEUP_TIME_MIN 1
 
-#define BT_CONNECT_TIME_SEC 15
+#define BT_CONNECT_TIME_SEC 30
 
 #define BATTERY_UPDATE_INTERVAL 5 //sets the interval of how often the battery level should be updated
 

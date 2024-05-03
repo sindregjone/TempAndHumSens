@@ -12,37 +12,15 @@
 * iOS source code: https://github.com/EspressifApp/EspBlufiForiOS
 ****************************************************************************/
 
-
-#include <NVS_Handler.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "freertos/semphr.h"
 #include "esp_system.h"
 #include "esp_mac.h"
-#include "esp_wifi.h"
-#include "esp_event.h"
 #include "esp_log.h"
-#include "nvs_flash.h"
 #include "esp_bt.h"
-#include "esp_http_client.h"
-#include "string.h"
-#include "stdbool.h"
-#include "esp_bt_main.h"
-#include "esp_task_wdt.h"
-#include "nvs.h"
-
-#include "esp_blufi_api.h"
-#include "blufi_example.h"
-#include "esp_blufi.h"
-
-#include "driver/i2c.h"
-#include "cJSON.h"
-#include "time.h"
-#include "sys/time.h"
 #include "esp_sleep.h"
 #include "driver/gpio.h"
 #include "driver/adc.h"
@@ -75,31 +53,28 @@ void bluetooth_task(void *params);
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
-    		    // Handle the interrupt event here (e.g., toggle an LED, send a signal)
-			BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-			vTaskNotifyGiveFromISR(bluetoothTaskHandle, &xHigherPriorityTaskWoken);
-			portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+      // Handle the interrupt event here (e.g., toggle an LED, send a signal)
+		 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		 vTaskNotifyGiveFromISR(bluetoothTaskHandle, &xHigherPriorityTaskWoken);
+		 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
 
-void gpio_button_init() {
-    		    gpio_config_t io_conf;
-    		    io_conf.intr_type = GPIO_INTR_NEGEDGE; // Trigger on falling edge
-    		    io_conf.mode = GPIO_MODE_INPUT;
-    		    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
-    		    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
-    		    io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    		    gpio_config(&io_conf);
+void gpio_button_init()
+{
+    	gpio_config_t io_conf;
+      	io_conf.intr_type = GPIO_INTR_NEGEDGE; // Trigger on falling edge
+    	io_conf.mode = GPIO_MODE_INPUT;
+   	    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
+ 	    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+ 	    gpio_config(&io_conf);
 
-    		    // Install GPIO ISR service
-    		    gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
-    		    // Attach the interrupt service routine
-    		    gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
-    		}
-
-
-
-
+ 	    // Install GPIO ISR service
+    	gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);
+    	// Attach the interrupt service routine
+        gpio_isr_handler_add(GPIO_BT, gpio_isr_handler, NULL);
+}
 
 void app_main(void)
 {
@@ -118,7 +93,7 @@ void app_main(void)
 	    //config wake-up sources
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW); //wake up source that wakes up the uC when a button is pressed
 
-		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_SEC * 1000000ULL); //wake up source that wakes up the uC after a given time
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL); //wake up source that wakes up the uC after a given time
 
 
 		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //gets the reason why the uC was woken up
@@ -173,6 +148,8 @@ void app_main(void)
 			}
 
 			printf("Current date and time: %s \n", Date_Time);
+
+
 
 			NVSmanageSensorID(GET_SENSOR_ID, deviceName, sizeof(deviceName)); //gets the SensorID from NVS
 
