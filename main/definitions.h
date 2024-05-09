@@ -20,8 +20,10 @@
 
 #define GPIO_SHTC3 7 //defines gpio pin for controlling power supply to SHTC3 sensor
 #define GPIO_BT 4 //defines gpio pin for bluetooth button
+#define GPIO_runningLED 10 //defines gpio pin for runningLED
 
-#define WAKEUP_TIME_MIN 1 //sets the sleep time of the uC
+#define WAKEUP_TIME_MIN 30 //sets the sleep time of the uC
+
 
 #define BT_CONNECT_TIME_SEC 30 //sets the time the uC is in bluetooth connect mode
 

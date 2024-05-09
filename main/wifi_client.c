@@ -69,7 +69,7 @@ void example_record_wifi_conn_info(int rssi, uint8_t reason)
 
 void example_wifi_connect(void)
 {
-    example_wifi_retry = 0;
+    example_wifi_retry = EXAMPLE_WIFI_CONNECTION_MAXIMUM_RETRY;
     gl_sta_is_connecting = (esp_wifi_connect() == ESP_OK);
     example_record_wifi_conn_info(EXAMPLE_INVALID_RSSI, EXAMPLE_INVALID_REASON);
 }
@@ -242,26 +242,7 @@ void wifi_event_handler(void* arg, esp_event_base_t event_base,
     }
     return;
 }
-/*
-void initialise_wifi(void)
-{
-    ESP_ERROR_CHECK(esp_netif_init());
-    wifi_event_group = xEventGroupCreate();
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
-    esp_netif_t *ap_netif = esp_netif_create_default_wifi_ap();
-    assert(ap_netif);
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &ip_event_handler, NULL));
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-    ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
-    example_record_wifi_conn_info(EXAMPLE_INVALID_RSSI, EXAMPLE_INVALID_REASON);
-    ESP_ERROR_CHECK( esp_wifi_start() );
-}
-*/
 
 esp_netif_t *sta_netif = NULL;
 esp_netif_t *ap_netif = NULL;

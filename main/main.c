@@ -36,15 +36,23 @@
 #include "wifi_client.h"
 
 
-
-
-//uint8_t gatts_service_uuid128_test_X[ESP_UUID_LEN_128] = {0x01, 0xc2, 0xaf, 0x4f, 0xb5, 0x1f, 0x9e, 0x45, 0xcc, 0x8f, 0x4b, 0x91, 0x31, 0xc3, 0xc9, 0xc5};
-//gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_128;
-//memcpy(gl_profile_tab[PROFILE_X_APP_ID].service_id.id.uuid.uuid.uuid128, gatts_service_uuid128_test_X, ESP_UUID_LEN_128);
-
-
 TaskHandle_t mainTaskHandle = NULL; //initialize the task handle for the main task to NULL
 TaskHandle_t bluetoothTaskHandle = NULL; //initialize the task handle for the bluetooth task to NULL
+TaskHandle_t runningLEDTaskHandle = NULL; //initialize the task handle for runningLED to NULL
+
+void runningLEDTask(void *params)
+{
+	gpio_reset_pin(GPIO_runningLED);
+		gpio_set_direction(GPIO_runningLED, GPIO_MODE_OUTPUT);
+
+	while(1)
+	{
+		gpio_set_level(GPIO_runningLED, 1);
+		vTaskDelay(1000);
+		gpio_set_level(GPIO_runningLED, 0);
+		vTaskDelay(1000);
+	}
+}
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
@@ -79,6 +87,7 @@ void app_main(void)
 		mainTaskHandle = xTaskGetCurrentTaskHandle(); //get the task handle from mainTask
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle); //starts the bluetooth task
+	    //xTaskCreate(runningLEDTask, "runningLED_task", 1024, NULL, 9, &runningLEDTaskHandle);
 
 	    gpio_BT_button_init(); //initializes the BT button
 
@@ -88,7 +97,7 @@ void app_main(void)
 	    //config wake-up sources:
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW); //wake up source that wakes up the uC when a button is pressed
 
-		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL); //wake up source that wakes up the uC after a given time
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 1000000ULL); //wake up source that wakes up the uC after a given time
 
 
 		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //gets the reason why the uC was woken up
@@ -110,7 +119,7 @@ void app_main(void)
 		vTaskDelay(100);
 
 		initialize_wifi(); //initializes wifi
-		vTaskDelay(100);
+		vTaskDelay(500);
 
 		gpio_set_level(GPIO_SHTC3, 1); //turns the SHTC3 sensor ON
 		i2c_master_init(); //initialize i2c
@@ -143,8 +152,8 @@ void app_main(void)
 
 			printf("Entering Deep-Sleep\r\n");
 
-			esp_wifi_stop(); //stops wifi
-			esp_bt_controller_disable(); //disables the bt controller
+			//esp_wifi_stop(); //stops wifi
+			//esp_bt_controller_disable(); //disables the bt controller
 
 			esp_deep_sleep_start(); //sends the uC into deep sleep
 

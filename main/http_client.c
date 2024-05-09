@@ -16,35 +16,6 @@
 #include "wifi_client.h"
 #include "definitions.h"
 
-/*
-esp_err_t client_event_get_handler(esp_http_client_event_handle_t evt)
-{
-    switch (evt->event_id)
-    {
-    case HTTP_EVENT_ON_DATA:
-        printf("HTTP_EVENT_ON_DATA: %.*s\n", evt->data_len, (char *)evt->data);
-        break;
-
-    default:
-        break;
-    }
-    return ESP_OK;
-}
-
-
-void rest_get()
-{
-    esp_http_client_config_t config_get = {
-        .url = SERVER_URL,
-        .method = HTTP_METHOD_GET,
-        .cert_pem = NULL,
-        .event_handler = client_event_get_handler};
-
-    esp_http_client_handle_t client = esp_http_client_init(&config_get);
-    esp_http_client_perform(client);
-    esp_http_client_cleanup(client);
-}
-*/
 
 esp_err_t client_event_post_handler(esp_http_client_event_handle_t evt)
 {
@@ -83,6 +54,8 @@ void rest_post(char sensorID[30],float temp, float hum, char batteryLevel[10])
 
 	esp_http_client_set_post_field(client, post_data, strlen(post_data));
     esp_err_t err = esp_http_client_perform(client);
+
+    vTaskDelay(100);
 
     if (err == ESP_OK) {
         ESP_LOGI("HTTP_POST", "HTTP POST Request completed successfully");
