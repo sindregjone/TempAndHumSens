@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-05-13T17:18:37.576Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="rd8SIy3Q49Rgh5pSp5nK" version="24.3.1" type="github">
+<mxfile host="app.diagrams.net" modified="2024-05-13T17:20:35.578Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="6GQv6dkOziXnvcGPchrv" version="24.3.1" type="github">
   <diagram name="Page-1" id="bg5PUJMc9OgYXb5h6lZY">
-    <mxGraphModel dx="4014" dy="1620" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1544" dy="365" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -91,17 +91,41 @@
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-20" value="Execute Insert Query" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="550" y="1700" width="120" height="60" as="geometry" />
         </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-22" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-22" value="Return Error 500" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="460" y="1820" width="120" height="60" as="geometry" />
         </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-24" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="1965" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-24" value="Log Success&amp;nbsp;&lt;div&gt;Return 200&lt;/div&gt;" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="640" y="1820" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-28" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="1995" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-28" value="Return Error 404" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="790" y="1820" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-31" value="Data inserted&amp;nbsp;&lt;div&gt;Return 200&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="310" y="1820" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-32" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="1965" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-32" value="Return Error 500" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="130" y="1820" width="120" height="60" as="geometry" />
@@ -129,8 +153,21 @@
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-36" value="Log Request" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="220" y="1560" width="120" height="60" as="geometry" />
         </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-40" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="40" y="1995" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="wUa7nKo1y6oaQ1cb9hvW-40" value="No Content&amp;nbsp;&lt;div&gt;Return 204&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="-20" y="1820" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-42" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1950" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="wUa7nKo1y6oaQ1cb9hvW-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.17;entryY=-0.009;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="wUa7nKo1y6oaQ1cb9hvW-31" target="wUa7nKo1y6oaQ1cb9hvW-42">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
