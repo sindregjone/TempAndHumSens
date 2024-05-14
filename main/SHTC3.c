@@ -24,7 +24,7 @@
 // SHTC3 Commands
 #define CMD_MEASURE_NMCE      0x7CA2  // Measure in Normal Mode, Clock stretching Enabled, Temp first
 #define CMD_MEASURE_LMCE	  0x6458  // Measure in Low power Mode, Clock stretching Enabled, Temp first
-#define CMD_MEASURE_LMCD	  0x609C  // Measure in Low power Mode, Clock stretching Enabled, Temp first
+#define CMD_MEASURE_LMCD	  0x609C  // Measure in Low power Mode, Clock stretching Disabled, Temp first
 #define CMD_SLEEP            0xB098
 #define CMD_WAKEUP           0x3517
 

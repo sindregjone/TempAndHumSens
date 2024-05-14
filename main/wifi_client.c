@@ -471,7 +471,7 @@ void example_event_callback(esp_blufi_cb_event_t event, esp_blufi_cb_param_t *pa
         esp_log_buffer_hex("Custom Data: ", param->custom_data.data, param->custom_data.data_len);
 
         if(param->custom_data.data_len > 0)
-        {
+        {k
 
 
 			deviceName = malloc(param->custom_data.data_len + 1);

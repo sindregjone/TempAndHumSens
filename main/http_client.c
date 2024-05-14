@@ -45,7 +45,7 @@ void rest_post(char sensorID[30],float temp, float hum, char batteryLevel[10])
         .url = "http://10.225.148.229:3000/sendData",
         .method = HTTP_METHOD_POST,
         .event_handler = client_event_post_handler};
-
+h
     esp_http_client_handle_t client = esp_http_client_init(&config_post);
     esp_http_client_set_header(client, "Content-Type", "application/json");
 
