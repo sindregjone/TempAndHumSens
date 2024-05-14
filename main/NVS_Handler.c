@@ -16,51 +16,49 @@
 void nvs_init(void)
 {
 	esp_err_t ret;
-	ret = nvs_flash_init();
+	ret = nvs_flash_init(); //initialize the NVS flash
 
-	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) //checks if there are no free pages or if a new version i found
 	{
-		ESP_ERROR_CHECK(nvs_flash_erase());
-		ret = nvs_flash_init();
+		ESP_ERROR_CHECK(nvs_flash_erase()); //erase the flash
+		ret = nvs_flash_init(); //reinitialize the NVS flash
 	}
 
-	ESP_ERROR_CHECK(ret);
+	ESP_ERROR_CHECK(ret); //check for errors
 }
 
 void nvs_reinit(void)
 {
 	esp_err_t ret;
-	ret = nvs_flash_erase();
-	nvs_init();
-	ESP_ERROR_CHECK( ret );
+	ret = nvs_flash_erase(); //erase the NVS flash
+	nvs_init(); //initialize the NVS flash
+	ESP_ERROR_CHECK( ret ); //check for errors
 }
 
 
-nvs_handle_t bootCounterHandle;
+nvs_handle_t bootCounterHandle; //create handle for bootCounter
 
 uint32_t updateBootCounter(void)
 {
-
-
-	nvs_open("Counter", NVS_READWRITE, &bootCounterHandle);
+	nvs_open("Counter", NVS_READWRITE, &bootCounterHandle); //open NVS handle for the Counter namespace
 
 	uint32_t bootCount = 0;
 
-	nvs_get_u32(bootCounterHandle, "boot_count", &bootCount);
+	nvs_get_u32(bootCounterHandle, "boot_count", &bootCount); //get the current boot count
 
-	bootCount ++;
+	bootCount ++; //increment the boot count
 
-	nvs_set_u32(bootCounterHandle, "boot_count", bootCount);
+	nvs_set_u32(bootCounterHandle, "boot_count", bootCount); //set the new boot count
 
-	nvs_commit(bootCounterHandle);
+	nvs_commit(bootCounterHandle); //commit the changes to NVS
 
-	nvs_close(bootCounterHandle);
+	nvs_close(bootCounterHandle); //close the NVS handle
 
-	printf("Boot Count: %ld\n\r", bootCount);
-	return bootCount;
+	printf("Boot Count: %ld\n\r", bootCount); //print the updated boot count
+	return bootCount; //returns the updated boot count
 }
 
-nvs_handle_t batteryLevelHandle;
+nvs_handle_t batteryLevelHandle; //create handle for batteryLevel
 
 
 void NVSmanageBatteryLevel(int operation, char* batLevel, size_t size)
