@@ -40,7 +40,7 @@ nvs_handle_t bootCounterHandle; //create handle for bootCounter
 
 uint32_t updateBootCounter(void)
 {
-	nvs_open("Counter", NVS_READWRITE, &bootCounterHandle); //open NVS handle for the Counter namespace
+	nvs_open("Counter", NVS_READWRITE, &bootCounterHandle); //open NVS handle for the "Counter" namespace
 
 	uint32_t bootCount = 0;
 
@@ -64,46 +64,47 @@ nvs_handle_t batteryLevelHandle; //create handle for batteryLevel
 void NVSmanageBatteryLevel(int operation, char* batLevel, size_t size)
 {
 
-	nvs_open("Battery", NVS_READWRITE, &batteryLevelHandle);
+	nvs_open("Battery", NVS_READWRITE, &batteryLevelHandle); //open NVS handle for the "Battery" namespace
 
-	if(operation == SET_BATTERY_LEVEL)
+	if(operation == SET_BATTERY_LEVEL) //checks if operation status SET_BATTERY_LEVEL
 	{
-		nvs_set_str(batteryLevelHandle, "batteryLevel", batLevel);
-		nvs_commit(batteryLevelHandle);
+		nvs_set_str(batteryLevelHandle, "batteryLevel", batLevel); //set batteryLevel in NVS to batLevel
+		nvs_commit(batteryLevelHandle); //commit the changes to NVS
 
 		printf("Battery level set to: %s\n\r", batLevel);
 	}
-	else if(operation == GET_BATTERY_LEVEL)
+	else if(operation == GET_BATTERY_LEVEL) //check if operation status is GET_BATTERY_LEVEL
 	{
-		nvs_get_str(batteryLevelHandle, "batteryLevel", batLevel, &size);
+		nvs_get_str(batteryLevelHandle, "batteryLevel", batLevel, &size); //get the batteryLevel from NVS
 	}
 
-	nvs_close(batteryLevelHandle);
+	nvs_close(batteryLevelHandle); //close the NVS handle
 }
 
-nvs_handle_t SensorIDHandle;
+nvs_handle_t SensorIDHandle; //create handle for SensorID
 
 void NVSmanageSensorID(int operation, char* sensorID, size_t size)
 {
-	nvs_open("ID", NVS_READWRITE, &SensorIDHandle);
+	nvs_open("ID", NVS_READWRITE, &SensorIDHandle); //open NVS handle for the "ID" namespace
 
-		if(operation == SET_SENSOR_ID)
+		if(operation == SET_SENSOR_ID) //checks if operation status is SET_SENSOR_ID
 		{
-			nvs_set_str(SensorIDHandle, "ID", sensorID);
-			nvs_commit(SensorIDHandle);
+			nvs_set_str(SensorIDHandle, "ID", sensorID); //set ID in NVS to sensorID
+			nvs_commit(SensorIDHandle); //commit the changes to NVS
 
 			printf("SensorID set to: %s\n\r", sensorID);
 		}
-		else if(operation == GET_SENSOR_ID)
+		else if(operation == GET_SENSOR_ID) //checks if operation status is GET_SENSOR_ID
 		{
-			esp_err_t err = nvs_get_str(SensorIDHandle, "ID", sensorID, &size);
+			esp_err_t err = nvs_get_str(SensorIDHandle, "ID", sensorID, &size); //get the ID from NVS
 
-			if(err == ESP_ERR_NVS_NOT_FOUND || size == 0)
+			if(err == ESP_ERR_NVS_NOT_FOUND || size == 0) //checks if nothing is written into the NVS
 			{
-				nvs_set_str(SensorIDHandle, "ID", DEFAULT_SENSOR_ID);
+				nvs_set_str(SensorIDHandle, "ID", DEFAULT_SENSOR_ID); //set the ID to DEFAULT_SENSOR_ID
+
 			}
-			nvs_get_str(SensorIDHandle, "ID", sensorID, &size);
+			nvs_get_str(SensorIDHandle, "ID", sensorID, &size); //get the ID from NVS
 		}
 
-		nvs_close(SensorIDHandle);
+		nvs_close(SensorIDHandle); //close the NVS handle
 }
