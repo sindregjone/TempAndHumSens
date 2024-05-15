@@ -3,6 +3,7 @@
  *
  *  Created on: 26. apr. 2024
  *      Author: sindregjone
+ *	initialize_bluetooth() is created by Epressif
  */
 
 #include "stdio.h"
