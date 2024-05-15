@@ -22,12 +22,12 @@
 #define GPIO_BT 4 //defines gpio pin for bluetooth button
 #define GPIO_runningLED 10 //defines gpio pin for runningLED
 
-#define WAKEUP_TIME_MIN 30 //sets the sleep time of the uC
+#define WAKEUP_TIME_MIN 15 //sets the sleep time of the uC
 
 
-#define BT_CONNECT_TIME_SEC 30 //sets the time the uC is in bluetooth connect mode
+#define BT_CONNECT_TIME_SEC 60 //sets the time the uC is in bluetooth connect mode
 
-#define BATTERY_UPDATE_INTERVAL 5 //sets the interval of how often the battery level should be updated
+#define BATTERY_UPDATE_INTERVAL 48 //sets the interval of how often the battery level should be updated
 
 
 //voltage from battery after voltage divider has range 2.1V - 3.0V

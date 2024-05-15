@@ -81,7 +81,7 @@ void app_main(void)
 	    //config wake-up sources:
 	    esp_deep_sleep_enable_gpio_wakeup(1 << GPIO_BT, ESP_GPIO_WAKEUP_GPIO_LOW); //wake up source that wakes up the uC when a button is pressed
 
-		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 1000000ULL); //wake up source that wakes up the uC after a given time
+		esp_sleep_enable_timer_wakeup(WAKEUP_TIME_MIN * 60 * 1000000ULL); //wake up source that wakes up the uC after a given time
 
 
 		esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause(); //gets the reason why the uC was woken up
