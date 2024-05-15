@@ -13,3 +13,4 @@ This project is created for the ESP32-C3 microcontroller. It is built upon the e
 - `blufi_security.c`: Source file that handles security aspects of the Blufi protocol.
 - `http_client.c`: Source file for managing HTTP client operations.
 - `SHTC3.c`: Source file for interfacing with the SHTC3 sensor, which measures temperature and humidity.
+- `wifi_client.c`: Source file for managing Wi-Fi client operations.
