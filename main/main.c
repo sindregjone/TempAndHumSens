@@ -38,25 +38,10 @@
 
 TaskHandle_t mainTaskHandle = NULL; //initialize the task handle for the main task to NULL
 TaskHandle_t bluetoothTaskHandle = NULL; //initialize the task handle for the bluetooth task to NULL
-TaskHandle_t runningLEDTaskHandle = NULL; //initialize the task handle for runningLED to NULL
-
-void runningLEDTask(void *params)
-{
-	gpio_reset_pin(GPIO_runningLED);
-		gpio_set_direction(GPIO_runningLED, GPIO_MODE_OUTPUT);
-
-	while(1)
-	{
-		gpio_set_level(GPIO_runningLED, 1);
-		vTaskDelay(1000);
-		gpio_set_level(GPIO_runningLED, 0);
-		vTaskDelay(1000);
-	}
-}
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
     {
-      // Handle the interrupt event here (e.g., toggle an LED, send a signal)
+      	 // Handle the interrupt event
 		 BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 		 vTaskNotifyGiveFromISR(bluetoothTaskHandle, &xHigherPriorityTaskWoken);
 		 portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -68,10 +53,10 @@ void gpio_BT_button_init()
     	gpio_config_t io_conf;
 
       	io_conf.intr_type = GPIO_INTR_NEGEDGE; // Trigger on falling edge
-    	io_conf.mode = GPIO_MODE_INPUT;
-   	    io_conf.pin_bit_mask = (1ULL << GPIO_BT);
- 	    io_conf.pull_up_en = GPIO_PULLUP_ENABLE;
-        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    	io_conf.mode = GPIO_MODE_INPUT; //set GPIO mode to input
+   	    io_conf.pin_bit_mask = (1ULL << GPIO_BT); //Configure only the GPIO pin indicated by GPIO_BT, setting all other pinss configurations unchanged
+ 	    io_conf.pull_up_en = GPIO_PULLUP_ENABLE; //enable the internal pullup resistor
+        io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE; //disable the internal pulldown resistor to avoid conflict
 
  	    gpio_config(&io_conf);
     	gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1);// Install GPIO ISR service
@@ -87,7 +72,6 @@ void app_main(void)
 		mainTaskHandle = xTaskGetCurrentTaskHandle(); //get the task handle from mainTask
 
 	    xTaskCreate(bluetooth_task, "bluetooth_task", BLUETOOTH_TASK_STACK_SIZE, NULL, BLUETOOTH_TASK_PRIORITY, &bluetoothTaskHandle); //starts the bluetooth task
-	    //xTaskCreate(runningLEDTask, "runningLED_task", 1024, NULL, 9, &runningLEDTaskHandle);
 
 	    gpio_BT_button_init(); //initializes the BT button
 
