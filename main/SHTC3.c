@@ -2,7 +2,7 @@
  * shtc3.c
  *
  * 	Created on: 12. mars 2024
- *      Author: sindregjone
+ *  Created by chatGPT and edited by sindregjone
  */
 
 #include "driver/i2c.h"
