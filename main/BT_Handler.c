@@ -6,6 +6,7 @@
  *	initialize_bluetooth() is created by Epressif
  */
 
+#include <blufi.h>
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
@@ -14,13 +15,11 @@
 #include "esp_log.h"
 #include "esp_bt.h"
 #include "esp_blufi_api.h"
-#include "blufi_example.h"
-
-//private files includes:
 #include "definitions.h"
 #include "wifi_client.h"
 #include "NVS_Handler.h"
 #include "BT_Handler.h"
+
 #include "definitions.h"
 
 void initialize_bluetooth() //function for initializing the bluetooth controller

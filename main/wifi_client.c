@@ -5,13 +5,14 @@
  *      Author: sindregjone
  */
 
+#include <blufi.h>
 #include "wifi_client.h"
+
 #include "esp_event.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "stdbool.h"
 #include "esp_blufi_api.h"
-#include "blufi_example.h"
 #include "string.h"
 #include "esp_log.h"
 #include "definitions.h"

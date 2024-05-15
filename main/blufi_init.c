@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
 
+#include <blufi.h>
 #include <stdio.h>
+
 #include "esp_err.h"
 #include "esp_blufi_api.h"
 #include "esp_log.h"
 #include "esp_blufi.h"
-#include "blufi_example.h"
 #ifdef CONFIG_BT_BLUEDROID_ENABLED
 #include "esp_bt.h"
 #include "esp_bt_main.h"
