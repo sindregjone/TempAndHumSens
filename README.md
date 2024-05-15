@@ -14,3 +14,7 @@ This project is created for the ESP32-C3 microcontroller. It is built upon the e
 - `http_client.c`: Source file for managing HTTP client operations.
 - `SHTC3.c`: Source file for interfacing with the SHTC3 sensor, which measures temperature and humidity.
 - `wifi_client.c`: Source file for managing Wi-Fi client operations.
+
+## Usage
+Once the project is flashed to the ESP32, it will start running automatically. 
+For changing variables as the server URL, the wakeupTime, the time it is in bluetooth mode, battery level update time or any GPIO ports, you must use the `definitions.h`file 
