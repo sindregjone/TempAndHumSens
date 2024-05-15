@@ -13,7 +13,7 @@ This project is created for the ESP32-C3 microcontroller. It is built upon the e
 - `NVS_Handler.c`: Source file for handling Non-Volatile Storage (NVS) operations.
 - `blufi_init.c`: Source file for initializing Bluetooth Low Energy (BLE) functionalities using Blufi.
 - `blufi_security.c`: Source file that handles security aspects of the Blufi protocol.
-- `blufi_security.h`: Header file defining functions and variables used in blufi.
+- `blufi.h`: Header file defining functions and variables used in blufi_init.c and blufi_security.c.
 - `http_client.c`: Source file for managing HTTP client operations.
 - `SHTC3.c`: Source file for interfacing with the SHTC3 sensor, which measures temperature and humidity.
 - `wifi_client.c`: Source file for managing Wi-Fi client operations.
