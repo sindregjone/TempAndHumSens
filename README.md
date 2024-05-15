@@ -4,8 +4,6 @@ This project is created for the ESP32-C3 microcontroller. It is built upon the e
 ## File structure
 - `main.c`: This is where the app_main function is located, where the program starts
 - `definitions.h`: Header file containing necessary definitions and macros used in the project
-- `Kconfig.projbuild`: Configuration file for the project used to define build settings
-- `CMakeLists.txt`: Here the components is registered
 - `battery_monitor.c`: Source file that handles battery monitoring functionality.
 - `battery_monitor.h`: Header file for `battery_monitor.c`, defining functions and variables related to battery monitoring.
 - `BT_Handler.c`: Source file for handling Bluetooth communication.
@@ -21,6 +19,8 @@ This project is created for the ESP32-C3 microcontroller. It is built upon the e
 - `SHTC3.h`: Header file for `SHTC3.c`, defining functions and variables related to the SHTC3 sensor.
 - `wifi_client.c`: Source file for managing Wi-Fi client operations.
 - `wifi_client.h`: Header file for `wifi_client.c`, defining functions and variables related to Wi-Fi client operations.
+- `Kconfig.projbuild`: Configuration file for the project used to define build settings
+- `CMakeLists.txt`: Here the components is registered
 
 ## Usage
 Once the project is flashed to the ESP32, it will start running automatically. 
