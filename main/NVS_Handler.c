@@ -3,6 +3,7 @@
  *
  *  Created on: 26. apr. 2024
  *      Author: sindregjone
+ *	Used this page for help with the NVS-library:  https://demo-dijiudu.readthedocs.io/en/latest/api-reference/storage/nvs_flash.html 
  */
 
 #include "stdio.h"
