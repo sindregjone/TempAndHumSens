@@ -1,4 +1,6 @@
 /*
+ *  main.c
+ *  
  *  author: sindregjone
  *
  * 
