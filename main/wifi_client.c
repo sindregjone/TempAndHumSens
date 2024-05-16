@@ -1,8 +1,8 @@
 /*
  * wifi_client.c
  *
- *  Created on: 22. mars 2024
- *      Author: sindregjone
+ *  
+ *  Created by Espressif, edited by sindregjone
  */
 
 #include <blufi.h>
