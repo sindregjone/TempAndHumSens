@@ -1,8 +1,8 @@
 /*
  * wifi_client.h
  *
- *  Created on: 22. mars 2024
- *      Author: sindregjone
+ *  
+ *  Created by Espressif, edited by sindregjone
  */
 
 #ifndef MAIN_WIFI_CLIENT_H_
